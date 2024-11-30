@@ -49,6 +49,10 @@
             width: 100%;
             padding: 0 20px;
         }
+        .modal-img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -98,11 +102,39 @@
         <p>Upload content, engage in conversations, and discover new perspectives!</p>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <img src="{{ asset('images/failedlogin.png') }}" alt="Error" class="modal-img">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Login Failed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    The password you entered is incorrect. Please try again.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
             $('#loginForm').on('submit', function (e) {
                 e.preventDefault();
-                alert('Login successful!');
+                
+                const email = $('#email').val();
+                const password = $('#password').val();
+
+                // Dummy validation logic
+                if (email === "test@example.com" && password === "password123") {
+                    alert('Login successful!');
+                } else {
+                    $('#errorModal').modal('show');
+                }
             });
         });
     </script>
