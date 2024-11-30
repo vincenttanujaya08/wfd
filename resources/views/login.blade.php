@@ -8,10 +8,67 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+        .card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1;
+        }
+        .bottom-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: large;
+            z-index: 1;
+            width: 100%;
+            padding: 0 20px;
+        }
+        .modal-img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body>
+    <video autoplay loop muted playsinline class="video-background">
+        <source src="{{ asset('video/friends.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="overlay">
+        <div class="pt-10" style="color: white; text-align:center; font-size:xx-large">
+            <h1><strong>"Share Your Story, See the World"</strong></h1>
+        </div>
+    </div>
+
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-lg p-4 w-100 max-w-md bg-white rounded-lg">
+        <div class="card shadow-lg p-4 w-100 max-w-md rounded-lg mx-3 my-4">
             <div class="text-center mb-4">
                 <h2 class="text-3xl font-bold text-gray-700">Welcome Back to Todit!</h2>
                 <p class="text-gray-500">Login to your account</p>
@@ -34,19 +91,54 @@
             </form>
             <div class="mt-4 text-center">
                 <p class="text-gray-500">Don't have an account? 
-                    <a href="signup.blade.php" class="text-blue-500 hover:underline">Sign up</a>
+                    <a href="{{ asset('signup') }}" class="text-blue-500 hover:underline">Sign up</a>
                 </p>
             </div>
         </div>
     </div>
+
+    <div class="bottom-text">
+        <p>Share your thoughts, join discussions, and connect with a global community</p> 
+        <p>Upload content, engage in conversations, and discover new perspectives!</p>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <img src="{{ asset('images/failedlogin.png') }}" alt="Error" class="modal-img">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Login Failed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    The password you entered is incorrect. Please try again.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
             $('#loginForm').on('submit', function (e) {
                 e.preventDefault();
-                alert('Login successful!');
+                
+                const email = $('#email').val();
+                const password = $('#password').val();
+
+                // Dummy validation logic
+                if (email === "test@example.com" && password === "password123") {
+                    alert('Login successful!');
+                } else {
+                    $('#errorModal').modal('show');
+                }
             });
         });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
