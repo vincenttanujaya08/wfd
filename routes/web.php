@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('signup');
 });
 
+Route::get('/home', function () {
+    return view('home');
+});
+
 use Illuminate\Support\Facades\DB;
 
     Route::get('/db-test', function () {
