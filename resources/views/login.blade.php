@@ -87,7 +87,7 @@
             </form>
             <div class="mt-4 text-center">
                 <p class="text-gray-500">Don't have an account? 
-                    <a href="" class="text-blue-500 hover:underline">Sign up</a>
+                    <a href="{{ asset('signup') }}" class="text-blue-500 hover:underline">Sign up</a>
                 </p>
             </div>
         </div>
