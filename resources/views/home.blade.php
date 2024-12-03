@@ -64,8 +64,13 @@
 </nav>
     </div>
     <div class="container">
+      
+    <form method="GET" action="{{ route('login') }}">
+        @csrf
         <h1>Welcome to Toddit</h1>
-        <button>Sign Up</button>
+        <button type="submit">Login</button>
+    </form>
+        
     </div>
   </body>
 </html>
