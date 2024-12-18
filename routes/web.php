@@ -31,12 +31,15 @@ Route::get('/app', function () {
     return view('app');
 })->name('app')->middleware('auth');
 
+<<<<<<< Updated upstream
 Route::get('/comment', function () {
     return view('comment');
 })->name('comment')->middleware('auth');
 
 
 
+=======
+>>>>>>> Stashed changes
 // Login Route - Only accessible if not authenticated (using guest middleware)
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
