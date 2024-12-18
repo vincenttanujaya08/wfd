@@ -50,7 +50,7 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            /* Removed overflow: hidden to fix white bar issue */
+          overflow: hidden;
         }
 
         /* Navbar Styles */
