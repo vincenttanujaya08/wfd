@@ -5,322 +5,424 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToDdit - Integrated Page</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <!-- Line Icons -->
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
 
-    <!-- Tailwind CSS (if needed) -->
+    <!-- Tailwind CSS (optional) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Custom CSS -->
-    
+    <style>
+        /* Import Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
+        /* Reset Styles */
+        ::after,
+        ::before {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        a {
+            text-decoration: none;
+        }
 
-<style>
-    /* Reset Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-::after,
-::before {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        li {
+            list-style: none;
+        }
 
-a {
-    text-decoration: none;
-}
+        h1 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            /* 24px */
+        }
 
-li {
-    list-style: none;
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fafbfe;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            /* Removed overflow: hidden to fix white bar issue */
+        }
 
-h1 {
-    font-weight: 600;
-    font-size: 1.5rem; /* Adjusted */
-}
+        /* Navbar Styles */
+        .navbar {
+            z-index: 1100;
+            /* Ensure navbar is above sidebar */
+        }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #fafbfe;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden; /* Hide scrollbars */
-}
+        /* Sidebar Styles */
+        #sidebar {
+            width: 4.375rem;
+            /* 70px = 4.375rem */
+            min-width: 4.375rem;
+            z-index: 1000;
+            transition: all 0.25s ease-in-out;
+            background-color: #239fa8;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
 
-/* Navbar Styles */
-.navbar {
-    z-index: 1100; /* Ensure navbar is above sidebar */
-}
+        #sidebar.expand {
+            width: 16.25rem;
+            /* 260px = 16.25rem */
+            min-width: 16.25rem;
+        }
 
-/* Sidebar Styles */
-#sidebar {
-    width: 4.375rem; /* 70px = 4.375rem */
-    min-width: 4.375rem;
-    z-index: 1000;
-    transition: all 0.25s ease-in-out;
-    background-color: #239fa8;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    position: fixed;
-    top: 3.5rem; /* 56px = 3.5rem */
-    left: 0;
-    overflow-y: auto;
-}
+        .toggle-btn {
+            background-color: transparent;
+            cursor: pointer;
+            border: 0;
+            padding: 1rem 1.5rem;
+            color: #FFF;
+        }
 
-#sidebar.expand {
-    width: 16.25rem; /* 260px = 16.25rem */
-    min-width: 16.25rem;
-}
+        .toggle-btn i {
+            font-size: 1.5rem;
+        }
 
-.toggle-btn {
-    background-color: transparent;
-    cursor: pointer;
-    border: 0;
-    padding: 1rem 1.5rem;
-    color: #FFF;
-}
+        .sidebar-logo {
+            margin: auto 0;
+            padding: 1rem;
+            text-align: center;
+        }
 
-.toggle-btn i {
-    font-size: 1.5rem;
-}
+        .sidebar-logo a {
+            color: #FFF;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
 
-.sidebar-logo {
-    margin: auto 0;
-    padding: 1rem;
-    text-align: center;
-}
+        /* Hide text in sidebar links when not expanded */
+        #sidebar:not(.expand) .sidebar-logo,
+        #sidebar:not(.expand) a.sidebar-link span {
+            display: none;
+        }
 
-.sidebar-logo a {
-    color: #FFF;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
+        .sidebar-nav {
+            padding: 2rem 0;
+            flex: 1 1 auto;
+        }
 
-#sidebar:not(.expand) .sidebar-logo,
-#sidebar:not(.expand) a.sidebar-link span {
-    display: none;
-}
+        a.sidebar-link {
+            padding: 0.625rem 1.625rem;
+            /* 10px 26px */
+            color: #FFF;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            position: relative;
+        }
 
-.sidebar-nav {
-    padding: 2rem 0;
-    flex: 1 1 auto;
-}
+        .sidebar-link i {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            min-width: 1.25rem;
+            /* 20px = 1.25rem */
+            text-align: center;
+        }
 
-a.sidebar-link {
-    padding: 0.625rem 1.625rem;
-    color: #FFF;
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    position: relative;
-}
+        a.sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.075);
+            border-left: 0.1875rem solid #3b7ddd;
+            /* 3px = 0.1875rem */
+        }
 
-.sidebar-link i {
-    font-size: 1.1rem;
-    margin-right: 0.75rem;
-    min-width: 1.25rem; /* 20px = 1.25rem */
-    text-align: center;
-}
+        .sidebar-item {
+            position: relative;
+        }
 
-a.sidebar-link:hover {
-    background-color: rgba(255, 255, 255, 0.075);
-    border-left: 0.1875rem solid #3b7ddd; /* 3px = 0.1875rem */
-}
+        #sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
+            position: absolute;
+            top: 0;
+            left: 4.375rem;
+            /* 70px = 4.375rem */
+            background-color: #0e1838;
+            padding: 0;
+            min-width: 15rem;
+            /* 240px = 15rem */
+            display: none;
+        }
 
-.sidebar-item {
-    position: relative;
-}
+        #sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
+            display: block;
+            max-height: 15em;
+            width: 100%;
+            opacity: 1;
+        }
 
-#sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
-    position: absolute;
-    top: 0;
-    left: 4.375rem; /* 70px = 4.375rem */
-    background-color: #0e1838;
-    padding: 0;
-    min-width: 15rem; /* Relative for dropdown size */
-    display: none;
-}
+        #sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
+            border: solid;
+            border-width: 0 0.075rem 0.075rem 0;
+            /* 1px = 0.075rem */
+            content: "";
+            display: inline-block;
+            padding: 0.125rem;
+            /* 2px = 0.125rem */
+            position: absolute;
+            right: 1.5rem;
+            top: 1.4rem;
+            transform: rotate(-135deg);
+            transition: all 0.2s ease-out;
+        }
 
-#sidebar:not(.expand) .sidebar-item:hover .has-dropdown+.sidebar-dropdown {
-    display: block;
-    max-height: 15em;
-    width: 100%;
-    opacity: 1;
-}
+        #sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
+            transform: rotate(45deg);
+            transition: all 0.2s ease-out;
+        }
 
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"]::after {
-    border: solid;
-    border-width: 0 0.075rem 0.075rem 0; /* 1px = 0.075rem */
-    content: "";
-    display: inline-block;
-    padding: 0.125rem; /* 2px = 0.125rem */
-    position: absolute;
-    right: 1.5rem;
-    top: 1.4rem;
-    transform: rotate(-135deg);
-    transition: all 0.2s ease-out;
-}
+        .sidebar-footer {
+            padding: 1rem;
+            position: relative;
+        }
 
-#sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
-    transform: rotate(45deg);
-    transition: all 0.2s ease-out;
-}
+        /* Ensure Logout remains visible */
+        #sidebar:not(.expand) .sidebar-footer .sidebar-link span {
+            display: none;
+        }
 
-.sidebar-footer {
-    padding: 1rem;
-}
+        /* Tooltip for Logout when sidebar is collapsed */
+        #sidebar .sidebar-footer .sidebar-link {
+            position: relative;
+        }
 
-/* Main Content Styles */
-.content {
-    margin-left: 4.375rem; /* 70px = 4.375rem */
-    padding: 1rem;
-    transition: margin-left 0.3s ease;
-    margin-top: 3.5rem; /* 56px = 3.5rem */
-    height: calc(100vh - 3.5rem);
-    overflow-y: auto;
-}
+        #sidebar:not(.expand) .sidebar-footer .sidebar-link::after {
+            content: 'Logout';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #0e1838;
+            color: #FFF;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            pointer-events: none;
+            margin-left: 0.5rem;
+            font-size: 0.875rem;
+        }
 
-#sidebar.expand ~ .content {
-    margin-left: 16.25rem; /* 260px = 16.25rem */
-}
+        #sidebar:not(.expand) .sidebar-footer .sidebar-link:hover::after {
+            opacity: 1;
+        }
 
-/* Search Box Styles */
-.search-box {
-    width: 100%;
-    max-width: 37.5rem; /* 600px = 37.5rem */
-    margin: 0 auto 2rem auto;
-    display: flex;
-    border: 0.0625rem solid #ddd; /* 1px = 0.0625rem */
-    border-radius: 0.3125rem; /* 5px = 0.3125rem */
-    box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1); /* Shadow adjusted */
-}
+        /* Main Content Styles */
+        .content {
+            margin-left: 4.375rem;
+            /* 70px = 4.375rem */
+            padding: 1rem;
+            transition: margin-left 0.3s ease;
+            margin-top: 3.5rem;
+            /* 56px = 3.5rem */
+            height: calc(100vh - 3.5rem);
+            overflow-y: auto;
+        }
 
-.search-input {
-    flex: 1;
-    border: none;
-    padding: 0.625rem; /* 10px = 0.625rem */
-    font-size: 1rem;
-    border-radius: 0.3125rem 0 0 0.3125rem; /* Rounded edges */
-}
+        #sidebar.expand~.content {
+            margin-left: 16.25rem;
+            /* 260px = 16.25rem */
+        }
 
-.search-input:focus {
-    outline: none;
-}
+        /* Search Box Styles */
+        .search-box {
+            width: 100%;
+            max-width: 37.5rem;
+            /* 600px = 37.5rem */
+            margin: 0 auto 2rem auto;
+            display: flex;
+            border: 0.0625rem solid #ddd;
+            /* 1px = 0.0625rem */
+            border-radius: 0.3125rem;
+            /* 5px = 0.3125rem */
+            box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1);
+            /* Shadow adjusted */
+        }
 
-.search-button {
-    background-color: #239fa8;
-    color: white;
-    border: none;
-    padding: 0.625rem 1.25rem; /* 10px 20px */
-    border-radius: 0 0.3125rem 0.3125rem 0;
-    cursor: pointer;
-}
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 0.625rem;
+            /* 10px = 0.625rem */
+            font-size: 1rem;
+            border-radius: 0.3125rem 0 0 0.3125rem;
+            /* Rounded edges */
+        }
 
-.search-button:hover {
-    background-color: #1d8c94;
-}
+        .search-input:focus {
+            outline: none;
+        }
 
-/* Post Styles */
-.post-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem; /* 20px = 1.25rem */
-}
+        .search-button {
+            background-color: #239fa8;
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            /* 10px 20px */
+            border-radius: 0 0.3125rem 0.3125rem 0;
+            cursor: pointer;
+        }
 
-.post {
-    background-color: white;
-    padding: 1.875rem; /* 30px = 1.875rem */
-    border-radius: 0.9375rem; /* 15px = 0.9375rem */
-    box-shadow: 0 0.375rem 0.625rem rgba(0, 0, 0, 0.15);
-}
+        .search-button:hover {
+            background-color: #1d8c94;
+        }
 
-.profile-picture {
-    cursor: pointer;
-    border-radius: 50%;
-    width: 3.125rem; /* 50px = 3.125rem */
-    height: 3.125rem;
-    transition: all 0.3s ease;
-}
+        /* Post Styles */
+        .post-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            /* 20px = 1.25rem */
+        }
 
-.profile-picture:hover {
-    opacity: 0.7;
-}
+        .post {
+            background-color: white;
+            padding: 1.875rem;
+            /* 30px = 1.875rem */
+            border-radius: 0.9375rem;
+            /* 15px = 0.9375rem */
+            box-shadow: 0 0.375rem 0.625rem rgba(0, 0, 0, 0.15);
+            max-width: 25rem;
+            /* 400px */
+            margin: 0 auto;
+            /* Center the card */
+        }
 
-#post-image-container {
-    width: 100%;
-    height: 18.75rem; /* 300px = 18.75rem */
-    overflow: hidden;
-    margin-top: 0.9375rem; /* 15px = 0.9375rem */
-}
+        .profile-picture {
+            cursor: pointer;
+            border-radius: 50%;
+            width: 3.125rem;
+            /* 50px = 3.125rem */
+            height: 3.125rem;
+            transition: all 0.3s ease;
+        }
 
-#post-image-container img {
-    width: 150%;
-    height: 100%;
-    object-fit: cover;
-}
+        .profile-picture:hover {
+            opacity: 0.7;
+        }
 
-.modal-content {
-    text-align: center;
-}
+        .post-image-container {
+            width: 100%;
+            height: 18.75rem;
+            /* 300px = 18.75rem */
+            overflow: hidden;
+            margin-top: 0.9375rem;
+            /* 15px = 0.9375rem */
+        }
 
-/* Responsive Adjustments */
-@media (min-width: 992px) {
-    #sidebar {
-        height: calc(100vh - 3.5rem); /* Navbar height */
-    }
+        .post-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .row {
-        height: 100%;
-        margin: 0;
-    }
+        .modal-content {
+            text-align: center;
+        }
 
-    .col-lg-7,
-    .col-lg-5 {
-        height: 100%;
-        padding: 0;
-    }
-}
+        /* Comment Section Styles */
+        .comment-section {
+            padding: 1rem;
+            border-top: 1px solid #ddd;
+            display: none;
+        }
 
-@media (max-width: 991.98px) {
-    #sidebar {
-        top: 3.5rem; /* Adjust for navbar on smaller screens */
-    }
+        .comment-section.active {
+            display: block;
+        }
 
-    .content {
-        height: calc(100vh - 3.5rem);
-    }
-}
-</style>
+        .comment-section h6 {
+            margin-bottom: 1rem;
+        }
+
+        .comment-section .comment-input-container {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .comment-section .comment-input-container input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.3125rem;
+            margin-right: 0.5rem;
+        }
+
+        .comment-section .comment-input-container button {
+            padding: 0.5rem 1rem;
+            background-color: #239fa8;
+            color: white;
+            border: none;
+            border-radius: 0.3125rem;
+            cursor: pointer;
+        }
+
+        .comment-section .comment-input-container button:hover {
+            background-color: #1d8c94;
+        }
+
+        .comment-section .comment-list {
+            list-style: none;
+            padding: 0;
+            max-height: 15rem;
+            overflow-y: auto;
+        }
+
+        .comment-section .comment-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .comment-section .comment-item img {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            cursor: pointer;
+        }
+
+        .comment-section .comment-item .comment-content {
+            background-color: #f3f4f6;
+            padding: 0.75rem 1rem;
+            border-radius: 0.3125rem;
+            width: 100%;
+        }
+
+        .comment-section .comment-item .comment-content p {
+            margin-bottom: 0.25rem;
+        }
+
+        .comment-section .comment-item .comment-content small {
+            color: #6c757d;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 576px) {
+            .post {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Navbar
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-        <div class="container-fluid">
-            <button class="toggle-btn" type="button">
-                <i class="lni lni-grid-alt"></i>
-            </button>
-            <a class="navbar-brand ms-2" href="#">ToDdit</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
-                <form method="POST" action="{{ route('logout') }}" class="d-flex">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-light">Logout</button>
-                </form>
-            </div>
-        </div>
-    </nav> -->
+
 
     <!-- Sidebar -->
     <aside id="sidebar">
@@ -372,7 +474,7 @@ a.sidebar-link:hover {
         </ul>
 
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="#" class="sidebar-link" data-bs-toggle="tooltip" data-bs-placement="right" title="Logout">
                 <i class="lni lni-exit"></i>
                 <span class="ms-2">Logout</span>
             </a>
@@ -396,48 +498,134 @@ a.sidebar-link:hover {
 
         <!-- Posts Section -->
         <div class="container post-container">
+            <!-- Single Post -->
             <div class="post bg-gray-100">
                 <div class="d-flex align-items-center">
                     <!-- Profile Picture -->
-                    <img id="profile-pic" class="profile-picture" src="https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8" alt="Profile Picture"
-                        data-bs-toggle="modal" data-bs-target="#profilePicModal">
+                    <img class="profile-picture user-profile-pic" src="https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8" alt="Profile Picture"
+                        data-bs-toggle="modal" data-bs-target="#profilePicModal" data-username="L0v3lyy" data-description="Loving cute moments and sharing them with the world 🐾">
                     <div class="ms-3">
                         <h5 class="mb-1">L0v3lyy</h5>
                         <p class="mb-0 text-muted">Posted 1 hour ago</p>
                     </div>
                 </div>
-                <div id="post-image-container">
-                    <img id="post-image" src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="Post Image">
+                <div class="post-image-container">
+                    <img class="post-image" src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="Post Image">
                 </div>
                 <div class="p-4">
                     <p class="mt-2">Look at these two cats, they are so adorable OMG 😭</p>
                 </div>
                 <div class="p-4">
                     <div class="d-flex align-items-center space-x-4 mt-3">
-                        <button class="btn btn-light text-gray-600 hover:text-blue-500 me-3">
+                        <button class="btn btn-light text-gray-600 hover:text-blue-500 me-3 comment-btn" data-post-id="1">
                             <img src="chat-dots.svg" alt="Comment" class="w-6 h-6">
                         </button>
-                        <button id="like-button" class="btn btn-light text-gray-600 hover:text-red-500 me-2">
-                            <img id="heart-icon" src="heart.svg" alt="Like" class="w-6 h-6">
+                        <button class="btn btn-light text-gray-600 hover:text-red-500 me-2 like-btn" data-post-id="1">
+                            <img src="heart.svg" alt="Like" class="heart-icon w-6 h-6">
                         </button>
-                        <span id="like-counter" class="text-gray-600">0</span>
+                        <span class="like-counter text-gray-600">0</span>
                     </div>
                 </div>
 
                 <!-- Comment Section (Hidden by default) -->
-                <div class="p-4 border-top d-none">
+                <div class="comment-section">
                     <h6 class="mb-3">Comments</h6>
-                    <div class="d-flex mb-3">
-                        <input id="comment-input" type="text" class="form-control me-2"
+                    <div class="comment-input-container">
+                        <input type="text" class="comment-input form-control me-2"
                             placeholder="Add a comment..." maxlength="200">
-                        <button id="add-comment" class="btn btn-primary">Post</button>
+                        <button class="add-comment btn btn-primary">Post</button>
                     </div>
-                    <ul id="comment-list" class="list-unstyled">
+                    <ul class="comment-list list-unstyled">
                         <!-- Comments will appear here dynamically -->
                     </ul>
                 </div>
             </div>
 
+            <!-- Repeat Posts as Needed -->
+            <!-- Ensure each post has unique data attributes if necessary -->
+            <div class="post bg-gray-100">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Picture -->
+                    <img class="profile-picture user-profile-pic" src="https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8" alt="Profile Picture"
+                        data-bs-toggle="modal" data-bs-target="#profilePicModal" data-username="L0v3lyy" data-description="Loving cute moments and sharing them with the world 🐾">
+                    <div class="ms-3">
+                        <h5 class="mb-1">L0v3lyy</h5>
+                        <p class="mb-0 text-muted">Posted 1 hour ago</p>
+                    </div>
+                </div>
+                <div class="post-image-container">
+                    <img class="post-image" src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="Post Image">
+                </div>
+                <div class="p-4">
+                    <p class="mt-2">Look at these two cats, they are so adorable OMG 😭</p>
+                </div>
+                <div class="p-4">
+                    <div class="d-flex align-items-center space-x-4 mt-3">
+                        <button class="btn btn-light text-gray-600 hover:text-blue-500 me-3 comment-btn" data-post-id="2">
+                            <img src="chat-dots.svg" alt="Comment" class="w-6 h-6">
+                        </button>
+                        <button class="btn btn-light text-gray-600 hover:text-red-500 me-2 like-btn" data-post-id="2">
+                            <img src="heart.svg" alt="Like" class="heart-icon w-6 h-6">
+                        </button>
+                        <span class="like-counter text-gray-600">0</span>
+                    </div>
+                </div>
+
+                <!-- Comment Section (Hidden by default) -->
+                <div class="comment-section">
+                    <h6 class="mb-3">Comments</h6>
+                    <div class="comment-input-container">
+                        <input type="text" class="comment-input form-control me-2"
+                            placeholder="Add a comment..." maxlength="200">
+                        <button class="add-comment btn btn-primary">Post</button>
+                    </div>
+                    <ul class="comment-list list-unstyled">
+                        <!-- Comments will appear here dynamically -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="post bg-gray-100">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Picture -->
+                    <img class="profile-picture user-profile-pic" src="https://newprofilepic.photo-cdn.net//assets/images/article/profile.jpg?90af0c8" alt="Profile Picture"
+                        data-bs-toggle="modal" data-bs-target="#profilePicModal" data-username="L0v3lyy" data-description="Loving cute moments and sharing them with the world 🐾">
+                    <div class="ms-3">
+                        <h5 class="mb-1">L0v3lyy</h5>
+                        <p class="mb-0 text-muted">Posted 1 hour ago</p>
+                    </div>
+                </div>
+                <div class="post-image-container">
+                    <img class="post-image" src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="Post Image">
+                </div>
+                <div class="p-4">
+                    <p class="mt-2">Look at these two cats, they are so adorable OMG 😭</p>
+                </div>
+                <div class="p-4">
+                    <div class="d-flex align-items-center space-x-4 mt-3">
+                        <button class="btn btn-light text-gray-600 hover:text-blue-500 me-3 comment-btn" data-post-id="3">
+                            <img src="chat-dots.svg" alt="Comment" class="w-6 h-6">
+                        </button>
+                        <button class="btn btn-light text-gray-600 hover:text-red-500 me-2 like-btn" data-post-id="3">
+                            <img src="heart.svg" alt="Like" class="heart-icon w-6 h-6">
+                        </button>
+                        <span class="like-counter text-gray-600">0</span>
+                    </div>
+                </div>
+
+                <!-- Comment Section (Hidden by default) -->
+                <div class="comment-section">
+                    <h6 class="mb-3">Comments</h6>
+                    <div class="comment-input-container">
+                        <input type="text" class="comment-input form-control me-2"
+                            placeholder="Add a comment..." maxlength="200">
+                        <button class="add-comment btn btn-primary">Post</button>
+                    </div>
+                    <ul class="comment-list list-unstyled">
+                        <!-- Comments will appear here dynamically -->
+                    </ul>
+                </div>
+            </div>
             <!-- Add more posts as needed -->
         </div>
     </div>
@@ -463,16 +651,20 @@ a.sidebar-link:hover {
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-        crossorigin="anonymous"></script>
+    <!-- Removed duplicate Bootstrap JS inclusion -->
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <!-- Custom JS -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Bootstrap tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+
             // Sidebar Toggle
             const toggleButtons = document.querySelectorAll('.toggle-btn');
             const sidebar = document.getElementById('sidebar');
@@ -485,52 +677,67 @@ a.sidebar-link:hover {
             });
 
             // Like button functionality
-            const likeButton = document.getElementById('like-button');
-            const heartIcon = document.getElementById('heart-icon');
-            const likeCounter = document.getElementById('like-counter');
-            let likeCount = 0;
+            const likeButtons = document.querySelectorAll('.like-btn');
 
-            likeButton.addEventListener('click', () => {
-                if (heartIcon.getAttribute('src').includes('heart-fill.svg')) {
-                    heartIcon.setAttribute('src', 'heart.svg');
-                    likeCount--;
-                } else {
-                    heartIcon.setAttribute('src', 'heart-fill.svg');
-                    likeCount++;
-                }
-                likeCounter.textContent = likeCount;
+            likeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const heartIcon = button.querySelector('.heart-icon');
+                    const likeCounter = button.nextElementSibling;
+                    let likeCount = parseInt(likeCounter.textContent);
+
+                    if (heartIcon.getAttribute('src').includes('heart-fill.svg')) {
+                        heartIcon.setAttribute('src', 'heart.svg');
+                        likeCount--;
+                    } else {
+                        heartIcon.setAttribute('src', 'heart-fill.svg');
+                        likeCount++;
+                    }
+                    likeCounter.textContent = likeCount;
+                });
             });
 
             // Comment section toggle functionality
-            const commentInputContainer = document.querySelector('.border-top');
-            const chatDotsButton = document.querySelector('button.btn-light img[alt="Comment"]');
+            const commentButtons = document.querySelectorAll('.comment-btn');
 
-            chatDotsButton.addEventListener('click', () => {
-                commentInputContainer.classList.toggle('d-none');
+            commentButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Find the closest post container
+                    const post = button.closest('.post');
+                    if (post) {
+                        const commentSection = post.querySelector('.comment-section');
+                        commentSection.classList.toggle('active');
+                    }
+                });
             });
 
             // Comment section functionality
-            const commentInput = document.getElementById('comment-input');
-            const addCommentButton = document.getElementById('add-comment');
-            const commentList = document.getElementById('comment-list');
+            const commentSections = document.querySelectorAll('.comment-section');
 
-            addCommentButton.addEventListener('click', () => {
-                const commentText = commentInput.value.trim();
-                if (commentText) {
-                    const commentItem = document.createElement('li');
-                    commentItem.className = 'd-flex align-items-start mb-3';
-                    commentItem.innerHTML = `
-                        <img src="girl2.jpg" alt="User" class="rounded-circle me-3 comment-profile-picture" data-username="SweetLimee" style="width: 40px; height: 40px; cursor: pointer;">
-                        <div>
-                            <p class="mb-1"><strong>SweetLimee:</strong> ${commentText}</p>
-                            <small class="text-muted">Just now</small>
-                        </div>
-                    `;
-                    commentList.appendChild(commentItem);
-                    commentInput.value = '';
-                } else {
-                    alert('Please enter a comment.');
-                }
+            commentSections.forEach(section => {
+                const addCommentButton = section.querySelector('.add-comment');
+                const commentInput = section.querySelector('.comment-input');
+                const commentList = section.querySelector('.comment-list');
+
+                addCommentButton.addEventListener('click', () => {
+                    const commentText = commentInput.value.trim();
+                    if (commentText) {
+                        const commentItem = document.createElement('li');
+                        commentItem.className = 'comment-item';
+                        commentItem.innerHTML = `
+                            <img src="girl2.jpg" alt="User" class="rounded-circle me-3 comment-profile-picture" data-username="SweetLimee" style="width: 2.5rem; height: 2.5rem; cursor: pointer;">
+                            <div class="comment-content">
+                                <p><strong>SweetLimee:</strong> ${commentText}</p>
+                                <small class="text-muted">Just now</small>
+                            </div>
+                        `;
+                        commentList.appendChild(commentItem);
+                        commentInput.value = '';
+                        // Optionally, scroll to the newest comment
+                        commentList.scrollTop = commentList.scrollHeight;
+                    } else {
+                        alert('Please enter a comment.');
+                    }
+                });
             });
 
             // Dynamic modal for profile pictures
@@ -539,27 +746,30 @@ a.sidebar-link:hover {
             const profilePicModalUsername = profilePicModal.querySelector('.fw-bold');
             const profilePicModalDescription = profilePicModal.querySelector('.text-muted');
 
-            // Poster Profile Picture
-            const posterProfilePic = document.getElementById('profile-pic');
-            posterProfilePic.addEventListener('click', () => {
-                profilePicModalImg.setAttribute('src', 'girl.jpg');
-                profilePicModalUsername.textContent = "Hi, I'm L0v3lyy";
-                profilePicModalDescription.textContent = "Loving cute moments and sharing them with the world 🐾";
+            // Handle profile picture click in posts
+            const userProfilePics = document.querySelectorAll('.user-profile-pic');
+            userProfilePics.forEach(pic => {
+                pic.addEventListener('click', () => {
+                    const username = pic.getAttribute('data-username');
+                    const description = pic.getAttribute('data-description');
+                    const src = pic.getAttribute('src');
+
+                    profilePicModalImg.setAttribute('src', src);
+                    profilePicModalUsername.textContent = `Hi, I'm ${username}`;
+                    profilePicModalDescription.textContent = description;
+                });
             });
 
-            // Commenter Profile Pictures
-            commentList.addEventListener('click', (event) => {
-                if (event.target.classList.contains('comment-profile-picture')) {
-                    const username = event.target.getAttribute('data-username');
-                    const imageUrl = event.target.getAttribute('src');
+            // Handle commenter profile picture click within comments
+            document.querySelectorAll('.comment-profile-picture').forEach(pic => {
+                pic.addEventListener('click', () => {
+                    const username = pic.getAttribute('data-username');
+                    const src = pic.getAttribute('src');
 
-                    profilePicModalImg.setAttribute('src', imageUrl);
+                    profilePicModalImg.setAttribute('src', src);
                     profilePicModalUsername.textContent = `Hi, I'm ${username}`;
                     profilePicModalDescription.textContent = `This is ${username}'s profile!`;
-
-                    const modal = new bootstrap.Modal(profilePicModal);
-                    modal.show();
-                }
+                });
             });
 
             // Search functionality (placeholder)
