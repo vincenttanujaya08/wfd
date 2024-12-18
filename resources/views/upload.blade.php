@@ -195,6 +195,70 @@
             padding: 1rem;
         }
     }
+
+    /* Styling untuk File Input */
+.form-group .file-input {
+    background: #000;
+    border: 1px dashed #444;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.form-group .file-input:hover {
+    background: #111;
+}
+
+.form-group .file-input input[type=file] {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* Styling untuk Daftar File */
+#fileList {
+    margin-top: 10px;
+    list-style-type: none;
+    padding: 0;
+}
+
+#fileList li {
+    background: #333;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#fileList li .file-name {
+    word-break: break-all;
+}
+
+#fileList li .remove-btn {
+    background: transparent;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+}
+
+#fileList li .remove-btn:hover {
+    color: #ff1a1a;
+}
+
 </style>
 
 <div class="content-wrapper">
@@ -221,11 +285,17 @@
 
                 <div class="form-group">
                     <label>Upload Images (min 1 image)</label>
-                    <div class="file-input" onclick="document.getElementById('imagesInput').click();">
+                    <label for="imagesInput" class="file-input" 
+                           role="button" 
+                           tabindex="0" 
+                           aria-describedby="fileInputDescription">
                         <span class="file-text">Click to select images</span>
-                        <input type="file" name="images[]" id="imagesInput" multiple required>
-                    </div>
+                    </label>
+                    <input type="file" name="images[]" id="imagesInput" multiple required accept="image/*" onchange="updateFileList();" aria-describedby="fileInputDescription" style="display:none;">
+                    <ul id="fileList" style="margin-top: 10px; list-style-type: none; padding: 0;"></ul>
                 </div>
+                
+                
 
                 <button type="submit" class="submit-btn">Post</button>
             </form>
@@ -277,6 +347,67 @@ topicInput.addEventListener('input', ()=>{
     }
 
     topicSuggestions.style.display='block';
+});
+
+
+function updateFileList() {
+    const fileInput = document.getElementById('imagesInput');
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Bersihkan daftar sebelumnya
+
+    if (fileInput.files.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No files selected';
+        li.style.color = 'red';
+        fileList.appendChild(li);
+        return;
+    }
+
+    Array.from(fileInput.files).forEach((file, index) => {
+        const li = document.createElement('li');
+
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.classList.add('file-name');
+        fileNameSpan.textContent = file.name;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        removeBtn.innerHTML = '&times;';
+        removeBtn.title = 'Remove this image';
+        removeBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            removeFile(index);
+        };
+
+        li.appendChild(fileNameSpan);
+        li.appendChild(removeBtn);
+        fileList.appendChild(li);
+    });
+}
+
+function removeFile(index) {
+    const fileInput = document.getElementById('imagesInput');
+    const dt = new DataTransfer();
+
+    Array.from(fileInput.files).forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+
+    fileInput.files = dt.files;
+    updateFileList();
+}
+
+// Validasi Form sebelum Pengiriman
+document.getElementById('postForm').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('imagesInput');
+    if (fileInput.files.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one image.');
+    }
+    // Validasi tambahan bisa ditambahkan di sini
 });
 
 // Optional: preview images, handle 'new topic' logic on submit, dsb.
