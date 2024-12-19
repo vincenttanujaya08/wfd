@@ -10,6 +10,7 @@ use App\Models\Image;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class PostController extends Controller
 {
     /**
@@ -70,7 +71,7 @@ class PostController extends Controller
     /**
      * Like or unlike a post.
      */
-    public function likePost($postId)
+    public function likePost(Request $request, $postId)
     {
         $user = auth()->user();
 
@@ -152,10 +153,42 @@ class PostController extends Controller
     {
         // Fetch posts belonging to the authenticated user, with related topics and images
         $posts = Post::where('user_id', Auth::id())
-                    ->with(['topics', 'images'])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->with(['topics', 'images'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('homee', compact('posts'));
+    }
+
+    public function fetchPosts(Request $request)
+    {
+        $sort = $request->get('sort', 'newest'); // Default to 'newest' if not provided
+
+        switch ($sort) {
+            case 'newest':
+                $posts = Post::with(['user', 'images', 'comments.user'])
+                    ->orderBy('created_at', 'desc');
+                break;
+
+            case 'popular':
+                $posts = Post::with(['user', 'images', 'comments.user'])
+                    ->orderBy('likes_count', 'desc');
+                break;
+
+            case 'oldest':
+                $posts = Post::with(['user', 'images', 'comments.user'])
+                    ->orderBy('created_at', 'asc');
+                break;
+
+            default:
+                $posts = Post::with(['user', 'images', 'comments.user'])
+                    ->orderBy('created_at', 'desc');
+                break;
+        }
+
+        // Implement pagination (optional but recommended)
+        $posts = $posts->paginate(10); // Fetch 10 posts per page
+
+        return response()->json($posts);
     }
 }

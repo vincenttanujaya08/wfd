@@ -71,6 +71,8 @@ Route::middleware('guest')->group(function() {
 // Logout Route (needs auth)
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
+Route::get('/posts', [PostController::class, 'fetchPosts'])->name('posts.fetch');
+
 // Database test route (for checking DB connection)
 Route::get('/db-test', function () {
     try {
