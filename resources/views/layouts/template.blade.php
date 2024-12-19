@@ -9,29 +9,43 @@
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
 
     <style>
-        body {
+        html, body {
             margin: 0;
-            font-family: sans-serif;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             background: #111;
             color: #ccc;
+            font-family: sans-serif;
+            overflow-x: hidden; /* Mencegah scroll horizontal */
         }
 
-        /* Main Content */
+        /* Misalnya sidebar collapse width = 70px, expanded width = 260px.
+           Kita akan atur main-content agar menyesuaikan.
+        */
+
+        /* Body dengan sidebar collapse */
+        body:not(.sidebar-open) .main-content {
+            margin-left: 70px; /* Ruang untuk sidebar collapse */
+            width: calc(100% - 70px);
+        }
+
+        /* Body dengan sidebar open */
+        body.sidebar-open .main-content {
+            margin-left: 260px; /* Jika sidebar expand menjadi 260px */
+            width: calc(100% - 260px);
+        }
+
         .main-content {
-           left: 100px;
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.3s ease, width 0.3s ease;
             padding: 1rem;
-            position: absolute;
-            z-index: 1;
-            width: 150vh;
+            box-sizing: border-box;
+            position: relative;
+            /* Tidak perlu absolute jika layout normal */
         }
 
-        /* Jika menginginkan efek overlay saat sidebar expanded, 
-           sudah diatur dalam sidebar.css atau inline di sidebar file 
-           (asumsi sudah ditangani di sana dengan .sidebar-open pada body) */
+        /* Overlay efek jika sidebar expanded, jika diinginkan */
         body.sidebar-open .main-content::before {
-            /* Contoh overlay (jika diinginkan)
-               Jika sudah ada di sidebar file, ini bisa dihapus atau disesuaikan. */
             content: "";
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -41,7 +55,7 @@
     </style>
 </head>
 <body>
-    @include('layouts.sidebar')
+    @include('layouts.sidebar') <!-- Pastikan sidebar memiliki logika .sidebar-open toggling pada body -->
 
     <div class="main-content">
         @yield('content')
