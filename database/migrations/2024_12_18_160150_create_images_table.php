@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
-            $table->longText('path'); // Path ke gambar
+            $table->string('path'); // Mengubah dari string default (255) menjadi VARCHAR(1000)
             $table->timestamps();
         });
     }
