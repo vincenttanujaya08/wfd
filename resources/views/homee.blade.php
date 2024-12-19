@@ -77,7 +77,7 @@
     .menu-btn {
         color: #ccc;
         cursor: pointer;
-        margin-left: auto;
+
     }
 
     .post-image img {
