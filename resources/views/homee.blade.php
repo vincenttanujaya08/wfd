@@ -2,6 +2,7 @@
 
 @section('content')
 <style>
+    /* Existing CSS */
     html, body {
         margin: 0;
         padding: 0;
@@ -27,22 +28,22 @@
         background: #111;
     }
 
-    /* Responsif Layout Postingan */
+    /* Responsive Layout for Posts */
     #userPostsContainer {
         display: grid;
         gap: 2rem;
-        grid-template-columns: 1fr; /* Default 1 kolom */
+        grid-template-columns: 1fr; /* Default 1 column */
     }
 
     @media (min-width: 768px) {
         #userPostsContainer {
-            grid-template-columns: repeat(2, 1fr); /* ≥768px: 2 kolom */
+            grid-template-columns: repeat(2, 1fr); /* ≥768px: 2 columns */
         }
     }
 
     @media (min-width: 1024px) {
         #userPostsContainer {
-            grid-template-columns: repeat(3, 1fr); /* ≥1024px: 3 kolom */
+            grid-template-columns: repeat(3, 1fr); /* ≥1024px: 3 columns */
         }
     }
 
@@ -76,18 +77,13 @@
     .menu-btn {
         color: #ccc;
         cursor: pointer;
+        margin-left: auto;
     }
 
-    .post-image {
-        background: #999;
+    .post-image img {
         width: 100%;
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #000;
-        font-weight: bold;
-        font-size:1rem;
+        height: auto;
+        object-fit: cover;
     }
 
     .post-footer {
@@ -133,7 +129,7 @@
         background:#555;
     }
 
-    /* Modal tanpa scroll internal */
+    /* Modal without internal scroll */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -158,9 +154,7 @@
         display: flex;
         flex-direction: column;
     }
-    #editCaption{
-        margin-right: 30px;
-    }
+
     .modal-header {
         display: flex;
         justify-content: space-between;
@@ -219,7 +213,40 @@
 <div class="content-wrapper">
     <div class="main-content">
         <h2>Your Posts</h2>
-        <div id="userPostsContainer"></div>
+        <div id="userPostsContainer">
+            @forelse($posts as $post)
+                <div class="post-card" data-post-id="{{ $post->id }}">
+                    <div class="post-header">
+                        <div class="username">{{ $post->user->name }}</div>
+                        <div class="time">{{ $post->created_at->diffForHumans() }}</div>
+                        <div class="menu-btn">⋮</div>
+                    </div>
+                    <div class="post-image">
+                        @if($post->images->count() > 0)
+                            <img src="{{ $post->images->first()->path }}" alt="Post Image">
+                        @else
+                            <div style="width:100%; height:200px; background:#999; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:1rem;">
+                                No Image
+                            </div>
+                        @endif
+                    </div>
+                    <div class="post-footer">
+                        <div class="description">
+                            {{ $post->description }}
+                            @if($post->edited)
+                                <span class="edited">(Edited)</span>
+                            @endif
+                        </div>
+                        <div class="actions">
+                            <button class="edit-btn">Edit</button>
+                            <button class="delete-btn" style="background:#800;">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <p>You have not created any posts yet.</p>
+            @endforelse
+        </div>
     </div>
 </div>
 
@@ -231,7 +258,7 @@
             <div class="close-btn" id="closeModalBtn">&times;</div>
         </div>
         <div class="modal-body">
-            <textarea id="editCaption"></textarea>
+            <textarea id="editCaption" placeholder="Edit your caption..."></textarea>
         </div>
         <div class="modal-actions">
             <button id="cancelEditBtn">Cancel</button>
@@ -241,145 +268,121 @@
 </div>
 
 <script>
-function randomLikes(){
-    return Math.floor(Math.random()*500);
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const editModal = document.getElementById('editModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const editCaption = document.getElementById('editCaption');
+        let currentEditPostId = null;
+        let currentEditCard = null;
 
-let userPosts = [
-    {
-        id:1,
-        user:"LoggedUser",
-        time:"30h",
-        desc:"My first post, just checking things out!",
-        edited:false,
-        comments: [{user:"Friend", text:"Nice!", time:"2m"}],
-        likes:randomLikes(),
-        image:"https://img.pikbest.com/origin/09/42/37/23apIkbEsTiRD.jpg!w700wp"
-    },
-    {
-        id:2,
-        user:"LoggedUser",
-        time:"12h",
-        desc:"Another day, another post",
-        edited:true,
-        comments:[],
-        likes:randomLikes(),
-        image:"https://img.pikbest.com/origin/09/42/37/23apIkbEsTiRD.jpg!w700wp"
-    }
-];
+        // Open Edit Modal
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
+                const description = card.querySelector('.description').innerText.replace('(Edited)', '').trim();
 
-const container = document.getElementById('userPostsContainer');
-userPosts.forEach(p=>{
-    container.appendChild(createPostElement(p));
-});
+                currentEditPostId = postId;
+                currentEditCard = card;
+                editCaption.value = description;
+                editModal.classList.add('show');
+            });
+        });
 
-let currentEditPost = null;
+        // Close Modal Functions
+        const closeModal = () => {
+            editModal.classList.remove('show');
+            currentEditPostId = null;
+            currentEditCard = null;
+            editCaption.value = '';
+        };
 
-function createPostElement(post){
-    const card = document.createElement('div');
-    card.classList.add('post-card');
-    card.dataset.postId = post.id;
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelEditBtn.addEventListener('click', closeModal);
 
-    const header = document.createElement('div');
-    header.classList.add('post-header');
-    header.innerHTML = `
-        <div class="username">${post.user}</div>
-        <div class="time">${post.time}</div>
-        <div class="menu-btn">⋮</div>
-    `;
-    card.appendChild(header);
+        // Save Edited Caption
+        saveEditBtn.addEventListener('click', () => {
+            const newDescription = editCaption.value.trim();
 
-    const imgDiv = document.createElement('div');
-    imgDiv.classList.add('post-image');
-    imgDiv.textContent = "Image here";
-    card.appendChild(imgDiv);
+            if(newDescription === '') {
+                alert('Caption cannot be empty.');
+                return;
+            }
 
-    const footer = document.createElement('div');
-    footer.classList.add('post-footer');
+            // Send AJAX request to update the caption
+            fetch(`/posts/${currentEditPostId}/edit`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ description: newDescription })
+            })
+            .then(response => {
+                if(response.ok){
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update the post.');
+                }
+            })
+            .then(data => {
+                // Update the caption in the UI
+                const descDiv = currentEditCard.querySelector('.description');
+                descDiv.textContent = data.description;
+                // Append "(Edited)" if not already present
+                if(!descDiv.innerHTML.includes('(Edited)')){
+                    const editedSpan = document.createElement('span');
+                    editedSpan.classList.add('edited');
+                    editedSpan.textContent = ' (Edited)';
+                    descDiv.appendChild(editedSpan);
+                }
+                // Close the modal
+                closeModal();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('An error occurred while updating the post.');
+            });
+        });
 
-    const desc = document.createElement('div');
-    desc.classList.add('description');
-    desc.textContent = post.desc;
-    if(post.edited){
-        const editedSpan = document.createElement('span');
-        editedSpan.classList.add('edited');
-        editedSpan.textContent = "(Edited)";
-        desc.appendChild(editedSpan);
-    }
-    footer.appendChild(desc);
+        // Delete Post
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
 
-    const actions = document.createElement('div');
-    actions.classList.add('actions');
-
-    const editBtn = document.createElement('button');
-    editBtn.textContent="Edit";
-    editBtn.addEventListener('click', ()=>openEditModal(post, card));
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent="Delete";
-    deleteBtn.style.background='#800';
-    deleteBtn.addEventListener('click', ()=>deletePost(post, card));
-
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
-    footer.appendChild(actions);
-
-    card.appendChild(footer);
-
-    return card;
-}
-
-function openEditModal(post, card){
-    currentEditPost = {post:post, card:card};
-    const editModal = document.getElementById('editModal');
-    const editCaption = document.getElementById('editCaption');
-    editCaption.value = post.desc;
-    editModal.classList.add('show');
-}
-
-function deletePost(post, card){
-    if(confirm("Are you sure want to delete this post?")){
-        userPosts = userPosts.filter(p=>p.id!==post.id);
-        card.remove();
-    }
-}
-
-function saveEdit(){
-    const editModal = document.getElementById('editModal');
-    const editCaption = document.getElementById('editCaption');
-    const newCaption = editCaption.value.trim();
-    const {post, card} = currentEditPost;
-
-    // Cek apakah berubah
-    if(newCaption!=='' && newCaption!==post.desc){
-        post.desc = newCaption;
-        post.edited = true;
-        updatePostUI(card, post);
-    }
-    editModal.classList.remove('show');
-    currentEditPost = null;
-}
-
-function cancelEdit(){
-    const editModal = document.getElementById('editModal');
-    editModal.classList.remove('show');
-    currentEditPost = null;
-}
-
-function updatePostUI(card, post){
-    const desc = card.querySelector('.description');
-    desc.textContent = post.desc;
-    if(post.edited){
-        const editedSpan = document.createElement('span');
-        editedSpan.classList.add('edited');
-        editedSpan.textContent = "(Edited)";
-        desc.appendChild(editedSpan);
-    }
-}
-
-// Modal events
-document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
-document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
-document.getElementById('closeModalBtn').addEventListener('click', cancelEdit);
+                if(confirm('Are you sure you want to delete this post?')){
+                    // Send AJAX request to delete the post
+                    fetch(`/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if(response.ok){
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to delete the post.');
+                        }
+                    })
+                    .then(data => {
+                        // Remove the post card from the UI
+                        card.remove();
+                        alert(data.message);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the post.');
+                    });
+                }
+            });
+        });
+    });
 </script>
 @endsection

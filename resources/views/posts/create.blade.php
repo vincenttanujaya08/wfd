@@ -21,8 +21,6 @@
         background: #111; 
     }
 
-    /* Removed Sidebar Styles */
-
     .main-content {
         flex: 1;
         padding: 2rem;
@@ -80,29 +78,6 @@
         resize: vertical;
     }
 
-    .form-group .file-input {
-        background: #000;
-        border: 1px dashed #444;
-        padding: 1rem;
-        text-align: center;
-        cursor: pointer;
-    }
-
-    .form-group .file-input:hover {
-        background: #111;
-    }
-
-    .form-group .file-input input[type=file] {
-        opacity: 0;
-        position: absolute;
-        left: -9999px;
-    }
-
-    .form-group .file-text {
-        color: #888;
-        font-size: 0.9rem;
-    }
-
     .submit-btn {
         display: block;
         width: 100%;
@@ -134,7 +109,7 @@
         z-index: 999;
         max-height: 200px;
         overflow-y: auto;
-        display: none; /* Ensure it's hidden by default */
+        display: none; /* Hidden by default */
     }
 
     .topic-suggestions .suggestion {
@@ -160,10 +135,7 @@
     }
 
     @media (max-width: 768px) {
-        /* Removed Sidebar Media Queries */
-
         .main-content {
-            order: 1;
             padding: 1rem;
         }
 
@@ -258,13 +230,14 @@
 
                 <!-- Image Links -->
                 <div class="form-group">
-                    <label>Input an Image!</label>
+                    <label>Image Links (min 1, max 5)</label>
                     <div id="imageLinksContainer">
                         <div class="image-url-group">
                             <input type="text" name="image_links[]" placeholder="Enter image URL..." required>
+                            <button type="button" class="remove-link-btn" onclick="removeImageLink(this)">Remove</button>
                         </div>
                     </div>
-                    
+                    <button type="button" class="add-image-btn" id="addImageLinkBtn" style="margin-top: 0.5rem;">Add Image Link</button>
                 </div>
 
                 <!-- Submit Button -->
