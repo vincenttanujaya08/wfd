@@ -119,6 +119,7 @@
 
     .image-slider img {
         width: 100%;
+        height: 20rem;
         display: none;
         object-fit: cover;
     }
@@ -525,524 +526,429 @@
 </div>
 
 <script>
-// Ensure that the DOM is fully loaded before executing scripts
-document.addEventListener('DOMContentLoaded', () => {
-    // Select Elements
-    const postContainer = document.getElementById('postContainer');
-    const seeMorePostsBtn = document.getElementById('seeMorePostsBtn');
-    const resetPostsBtn = document.getElementById('resetPostsBtn');
-    const sortSelect = document.getElementById('sortPostsSelect');
+    // Ensure that the DOM is fully loaded before executing scripts
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select Elements
+        const postContainer = document.getElementById('postContainer');
+        const seeMorePostsBtn = document.getElementById('seeMorePostsBtn');
+        const resetPostsBtn = document.getElementById('resetPostsBtn');
+        const sortSelect = document.getElementById('sortPostsSelect');
 
-    // Pagination and Sorting Variables
-    let currentPage = 1;
-    let currentSort = 'newest';
-    let totalPages = 1;
-    const chunkSize = 3; // You can adjust this based on your preference
+        // Pagination and Sorting Variables
+        let currentPage = 1;
+        let currentSort = 'newest';
+        let totalPages = 1;
+        const chunkSize = 3; // You can adjust this based on your preference
 
-    // Modal Elements
-    const commentModal = document.getElementById('commentModal');
-    const closeModal = document.getElementById('closeModal');
-    const commentList = document.getElementById('commentList');
-    const commentForm = document.getElementById('commentForm');
-    let currentPostId = null;
+        // Modal Elements
+        const commentModal = document.getElementById('commentModal');
+        const closeModal = document.getElementById('closeModal');
+        const commentList = document.getElementById('commentList');
+        const commentForm = document.getElementById('commentForm');
+        let currentPostId = null;
 
-    // Initial Load
-    fetchPosts(currentSort, currentPage);
-
-    // Event Listeners
-    sortSelect.addEventListener('change', () => {
-        currentSort = sortSelect.value;
-        currentPage = 1;
-        postContainer.innerHTML = '';
+        // Initial Load
         fetchPosts(currentSort, currentPage);
-        resetPostsBtn.style.display = 'none';
-    });
 
-    seeMorePostsBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            fetchPosts(currentSort, currentPage, true);
-        }
-    });
+        // Event Listeners
+        sortSelect.addEventListener('change', () => {
+            currentSort = sortSelect.value;
+            currentPage = 1;
+            postContainer.innerHTML = '';
+            fetchPosts(currentSort, currentPage);
+            resetPostsBtn.style.display = 'none';
+        });
 
-    resetPostsBtn.addEventListener('click', () => {
-        currentSort = 'newest';
-        sortSelect.value = 'newest';
-        currentPage = 1;
-        postContainer.innerHTML = '';
-        fetchPosts(currentSort, currentPage);
-        resetPostsBtn.style.display = 'none';
-    });
+        seeMorePostsBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                fetchPosts(currentSort, currentPage, true);
+            }
+        });
 
-    closeModal.addEventListener('click', () => {
-        commentModal.classList.remove('show');
-    });
+        resetPostsBtn.addEventListener('click', () => {
+            currentSort = 'newest';
+            sortSelect.value = 'newest';
+            currentPage = 1;
+            postContainer.innerHTML = '';
+            fetchPosts(currentSort, currentPage);
+            resetPostsBtn.style.display = 'none';
+        });
 
-    commentModal.addEventListener('click', (e) => {
-        if (e.target === commentModal) {
+        closeModal.addEventListener('click', () => {
             commentModal.classList.remove('show');
+        });
+
+        commentModal.addEventListener('click', (e) => {
+            if (e.target === commentModal) {
+                commentModal.classList.remove('show');
+            }
+        });
+
+        commentForm.addEventListener('submit', addComment);
+
+        // Function to Fetch Posts from the Server
+        function fetchPosts(sort, page, append = false) {
+            fetch(`/posts?sort=${sort}&page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    totalPages = data.last_page;
+
+                    data.data.forEach(post => {
+                        const postElement = createPostElement(post);
+                        postContainer.appendChild(postElement);
+                    });
+
+                    // Update "See More" and "Reset" Buttons
+                    if (currentPage >= totalPages) {
+                        seeMorePostsBtn.textContent = "No more";
+                        seeMorePostsBtn.classList.add('disabled');
+                        seeMorePostsBtn.style.cursor = 'default';
+                        resetPostsBtn.style.display = 'inline-block';
+                    } else {
+                        seeMorePostsBtn.textContent = "See More Posts";
+                        seeMorePostsBtn.classList.remove('disabled');
+                        seeMorePostsBtn.style.cursor = 'pointer';
+                    }
+                })
+                .catch(error => console.error('Error fetching posts:', error));
         }
-    });
 
-    commentForm.addEventListener('submit', addComment);
+        // Function to Create a Post Element
+        function createPostElement(post) {
+            const card = document.createElement('div');
+            card.classList.add('post-card');
+            card.dataset.postId = post.id;
 
-    // Function to Fetch Posts from the Server
-    function fetchPosts(sort, page, append = false) {
-        fetch(`/posts?sort=${sort}&page=${page}`)
-            .then(response => response.json())
-            .then(data => {
-                totalPages = data.last_page;
-
-                data.data.forEach(post => {
-                    const postElement = createPostElement(post);
-                    postContainer.appendChild(postElement);
-                });
-
-                // Update "See More" and "Reset" Buttons
-                if (currentPage >= totalPages) {
-                    seeMorePostsBtn.textContent = "No more";
-                    seeMorePostsBtn.classList.add('disabled');
-                    seeMorePostsBtn.style.cursor = 'default';
-                    resetPostsBtn.style.display = 'inline-block';
-                } else {
-                    seeMorePostsBtn.textContent = "See More Posts";
-                    seeMorePostsBtn.classList.remove('disabled');
-                    seeMorePostsBtn.style.cursor = 'pointer';
-                }
-            })
-            .catch(error => console.error('Error fetching posts:', error));
-    }
-
-    // Function to Create a Post Element
-    function createPostElement(post) {
-        const card = document.createElement('div');
-        card.classList.add('post-card');
-        card.dataset.postId = post.id;
-
-        // Post Header
-        const header = document.createElement('div');
-        header.classList.add('post-header');
-        header.innerHTML = `
+            // Post Header
+            const header = document.createElement('div');
+            header.classList.add('post-header');
+            header.innerHTML = `
             <div class="username">${post.user.name}</div>
             <div class="time">${timeAgo(new Date(post.created_at))}</div>
             <div class="menu-btn">⋮</div>
         `;
-        card.appendChild(header);
+            card.appendChild(header);
 
-        // Image Slider
-        const slider = document.createElement('div');
-        slider.classList.add('image-slider');
+            // Image Slider
+            const slider = document.createElement('div');
+            slider.classList.add('image-slider');
 
-        post.images.forEach((image, index) => {
-            const img = document.createElement('img');
-            img.src = image.path; // Assuming 'path' contains the image URL
-            if (index === 0) img.classList.add('active');
-            slider.appendChild(img);
-        });
+            post.images.forEach((image, index) => {
+                const img = document.createElement('img');
+                img.src = image.path; // Assuming 'path' contains the image URL
+                if (index === 0) img.classList.add('active');
+                slider.appendChild(img);
+            });
 
-        if (post.images.length > 1) {
-            const prevBtn = document.createElement('div');
-            prevBtn.classList.add('slider-btn', 'slider-prev');
-            prevBtn.innerHTML = '&#10094;';
-            const nextBtn = document.createElement('div');
-            nextBtn.classList.add('slider-btn', 'slider-next');
-            nextBtn.innerHTML = '&#10095;';
+            if (post.images.length > 1) {
+                const prevBtn = document.createElement('div');
+                prevBtn.classList.add('slider-btn', 'slider-prev');
+                prevBtn.innerHTML = '&#10094;';
+                const nextBtn = document.createElement('div');
+                nextBtn.classList.add('slider-btn', 'slider-next');
+                nextBtn.innerHTML = '&#10095;';
 
-            prevBtn.addEventListener('click', () => slideImages(slider, -1));
-            nextBtn.addEventListener('click', () => slideImages(slider, 1));
+                prevBtn.addEventListener('click', () => slideImages(slider, -1));
+                nextBtn.addEventListener('click', () => slideImages(slider, 1));
 
-            slider.appendChild(prevBtn);
-            slider.appendChild(nextBtn);
+                slider.appendChild(prevBtn);
+                slider.appendChild(nextBtn);
+            }
+
+            // Like on Double Click
+            slider.addEventListener('dblclick', () => {
+                toggleLike(post.id, card);
+            });
+
+            card.appendChild(slider);
+
+            // Post Footer
+            const footer = document.createElement('div');
+            footer.classList.add('post-footer');
+
+            const desc = document.createElement('div');
+            desc.classList.add('description');
+            desc.textContent = post.description;
+            footer.appendChild(desc);
+
+            const actions = document.createElement('div');
+            actions.classList.add('actions');
+            updateActionsHTML(actions, post);
+            footer.appendChild(actions);
+
+            card.appendChild(footer);
+
+            // Event Listeners for Actions
+            const commentBtn = actions.querySelector('.comment-btn');
+            commentBtn.addEventListener('click', () => {
+                currentPostId = post.id;
+                showComments(post.id);
+                commentModal.classList.add('show');
+            });
+
+            const likeBtn = actions.querySelector('.like-btn');
+            likeBtn.addEventListener('click', () => {
+                toggleLike(post.id, card);
+            });
+
+            return card;
         }
 
-        // Like on Double Click
-        slider.addEventListener('dblclick', () => {
-            toggleLike(post.id, card);
-        });
-
-        card.appendChild(slider);
-
-        // Post Footer
-        const footer = document.createElement('div');
-        footer.classList.add('post-footer');
-
-        const desc = document.createElement('div');
-        desc.classList.add('description');
-        desc.textContent = post.description;
-        footer.appendChild(desc);
-
-        const actions = document.createElement('div');
-        actions.classList.add('actions');
-        updateActionsHTML(actions, post);
-        footer.appendChild(actions);
-
-        card.appendChild(footer);
-
-        // Event Listeners for Actions
-        const commentBtn = actions.querySelector('.comment-btn');
-        commentBtn.addEventListener('click', () => {
-            currentPostId = post.id;
-            showComments(post.id);
-            commentModal.classList.add('show');
-        });
-
-        const likeBtn = actions.querySelector('.like-btn');
-        likeBtn.addEventListener('click', () => {
-            toggleLike(post.id, card);
-        });
-
-        return card;
-    }
-
-    // Function to Update Actions HTML
-    function updateActionsHTML(actions, post) {
-        actions.innerHTML = `
+        // Function to Update Actions HTML
+        function updateActionsHTML(actions, post) {
+            actions.innerHTML = `
             <span class="comment-btn"><i class="lni lni-comments"></i> ${post.comments.length}</span>
             <span class="like-btn ${post.liked ? 'liked' : ''}"><i class="lni lni-heart"></i> ${post.likes_count}</span>
         `;
-    }
+        }
 
-    // Function to Slide Images in the Slider
-    function slideImages(slider, direction) {
-        const imgs = slider.querySelectorAll('img');
-        let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
-        imgs[activeIndex].classList.remove('active');
-        activeIndex += direction;
-        if (activeIndex < 0) activeIndex = imgs.length - 1;
-        if (activeIndex >= imgs.length) activeIndex = 0;
-        imgs[activeIndex].classList.add('active');
-    }
+        // Function to Slide Images in the Slider
+        function slideImages(slider, direction) {
+            const imgs = slider.querySelectorAll('img');
+            let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
+            imgs[activeIndex].classList.remove('active');
+            activeIndex += direction;
+            if (activeIndex < 0) activeIndex = imgs.length - 1;
+            if (activeIndex >= imgs.length) activeIndex = 0;
+            imgs[activeIndex].classList.add('active');
+        }
 
-    // Function to Toggle Like
-    function toggleLike(postId, card) {
-        fetch(`/posts/${postId}/like`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}', // Ensure CSRF token is included
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-            const likeBtn = card.querySelector('.like-btn');
-            likeBtn.classList.toggle('liked');
-            likeBtn.innerHTML = `<i class="lni lni-heart"></i> ${data.likes_count}`;
-        })
-        .catch(error => console.error('Error liking post:', error));
-    }
+        // Function to Toggle Like
+        function toggleLike(postId, card) {
+            fetch(`/posts/${postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Ensure CSRF token is included
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const likeBtn = card.querySelector('.like-btn');
+                    likeBtn.classList.toggle('liked');
+                    likeBtn.innerHTML = `<i class="lni lni-heart"></i> ${data.likes_count}`;
+                })
+                .catch(error => console.error('Error liking post:', error));
+        }
 
-    // Function to Display "Time Ago" Format
-    function timeAgo(date) {
-        const seconds = Math.floor((new Date() - date) / 1000);
+        // Function to Display "Time Ago" Format
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
 
-        let interval = Math.floor(seconds / 31536000);
-        if (interval >= 1) return interval + " year" + (interval > 1 ? "s" : "") + " ago";
+            let interval = Math.floor(seconds / 31536000);
+            if (interval >= 1) return interval + " year" + (interval > 1 ? "s" : "") + " ago";
 
-        interval = Math.floor(seconds / 2592000);
-        if (interval >= 1) return interval + " month" + (interval > 1 ? "s" : "") + " ago";
+            interval = Math.floor(seconds / 2592000);
+            if (interval >= 1) return interval + " month" + (interval > 1 ? "s" : "") + " ago";
 
-        interval = Math.floor(seconds / 86400);
-        if (interval >= 1) return interval + " day" + (interval > 1 ? "s" : "") + " ago";
+            interval = Math.floor(seconds / 86400);
+            if (interval >= 1) return interval + " day" + (interval > 1 ? "s" : "") + " ago";
 
-        interval = Math.floor(seconds / 3600);
-        if (interval >= 1) return interval + " hour" + (interval > 1 ? "s" : "") + " ago";
+            interval = Math.floor(seconds / 3600);
+            if (interval >= 1) return interval + " hour" + (interval > 1 ? "s" : "") + " ago";
 
-        interval = Math.floor(seconds / 60);
-        if (interval >= 1) return interval + " minute" + (interval > 1 ? "s" : "") + " ago";
+            interval = Math.floor(seconds / 60);
+            if (interval >= 1) return interval + " minute" + (interval > 1 ? "s" : "") + " ago";
 
-        return "Just now";
-    }
+            return "Just now";
+        }
 
-    // Function to Show Comments in Modal
-    function showComments(postId) {
-        commentList.innerHTML = '';
-        fetch(`/posts/${postId}/comments`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(comment => {
-                    const div = document.createElement('div');
-                    div.classList.add('comment-item');
+        // Function to Show Comments in Modal
+        function showComments(postId) {
+            commentList.innerHTML = '';
+            fetch(`/posts/${postId}/comments`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(comment => {
+                        const div = document.createElement('div');
+                        div.classList.add('comment-item');
 
-                    const header = document.createElement('div');
-                    header.classList.add('comment-item-header');
+                        const header = document.createElement('div');
+                        header.classList.add('comment-item-header');
 
-                    const userSpan = document.createElement('span');
-                    userSpan.classList.add('comment-user');
-                    userSpan.textContent = comment.user.name;
+                        const userSpan = document.createElement('span');
+                        userSpan.classList.add('comment-user');
+                        userSpan.textContent = comment.user.name;
 
-                    const timeSpan = document.createElement('span');
-                    timeSpan.classList.add('comment-time');
-                    timeSpan.textContent = timeAgo(new Date(comment.created_at));
+                        const timeSpan = document.createElement('span');
+                        timeSpan.classList.add('comment-time');
+                        timeSpan.textContent = timeAgo(new Date(comment.created_at));
 
-                    header.appendChild(userSpan);
-                    header.appendChild(timeSpan);
+                        header.appendChild(userSpan);
+                        header.appendChild(timeSpan);
 
-                    const textDiv = document.createElement('div');
-                    textDiv.classList.add('comment-text');
-                    textDiv.textContent = comment.text;
+                        const textDiv = document.createElement('div');
+                        textDiv.classList.add('comment-text');
+                        textDiv.textContent = comment.text;
 
-                    div.appendChild(header);
-                    div.appendChild(textDiv);
+                        div.appendChild(header);
+                        div.appendChild(textDiv);
 
-                    commentList.appendChild(div);
-                });
-            })
-            .catch(error => console.error('Error fetching comments:', error));
-    }
+                        commentList.appendChild(div);
+                    });
+                })
+                .catch(error => console.error('Error fetching comments:', error));
+        }
 
-    // Function to Add a Comment
-    function addComment(e) {
-        e.preventDefault();
-        const input = commentForm.querySelector('input');
-        const newCommentText = input.value.trim();
-        if (!newCommentText) return;
+        // Function to Add a Comment
+        function addComment(e) {
+            e.preventDefault();
+            const input = commentForm.querySelector('input');
+            const newCommentText = input.value.trim();
+            if (!newCommentText) return;
 
-        fetch(`/posts/${currentPostId}/comments`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ text: newCommentText })
-        })
-        .then(response => response.json())
-        .then(data => {
-            input.value = '';
-            showComments(currentPostId);
+            fetch(`/posts/${currentPostId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: newCommentText
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    input.value = '';
+                    showComments(currentPostId);
 
-            // Update the comments count in the post card
-            const postCard = document.querySelector(`.post-card[data-post-id='${currentPostId}']`);
-            const commentBtn = postCard.querySelector('.comment-btn');
-            const currentCount = parseInt(commentBtn.textContent.split(' ')[1]) || 0;
-            commentBtn.innerHTML = `<i class="lni lni-comments"></i> ${currentCount + 1}`;
-        })
-        .catch(error => console.error('Error adding comment:', error));
-    }
+                    // Update the comments count in the post card
+                    const postCard = document.querySelector(`.post-card[data-post-id='${currentPostId}']`);
+                    const commentBtn = postCard.querySelector('.comment-btn');
+                    const currentCount = parseInt(commentBtn.textContent.split(' ')[1]) || 0;
+                    commentBtn.innerHTML = `<i class="lni lni-comments"></i> ${currentCount + 1}`;
+                })
+                .catch(error => console.error('Error adding comment:', error));
+        }
 
-    // Initial Loading of Topics and Profiles
-    loadMoreTopics();
-    loadMoreProfiles();
-
-    // Search Functionality for Topics and Profiles
-    const searchTopicsInput = document.getElementById('searchTopicsInput');
-    const searchProfilesInput = document.getElementById('searchProfilesInput');
-
-    searchTopicsInput.addEventListener('input', filterTopics);
-    searchProfilesInput.addEventListener('input', filterProfiles);
-
-    // Functions for Topics Pagination
-    let topicIndex = 0;
-    const topicContainer = document.getElementById('topicContainer');
-    const seeMoreTopicsBtn = document.getElementById('seeMoreTopicsBtn');
-    const resetTopicsBtn = document.getElementById('resetTopicsBtn');
-
-    seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
-    resetTopicsBtn.addEventListener('click', resetTopics);
-
-    function loadMoreTopics() {
-        const slice = allTopics.slice(topicIndex, topicIndex + chunkSize);
-        slice.forEach(t => {
-            const a = document.createElement('a');
-            a.href = "#";
-            a.textContent = t;
-            topicContainer.appendChild(a);
-        });
-        topicIndex += chunkSize;
-        checkTopicsPagination();
-    }
-
-    function resetTopics() {
-        topicIndex = 0;
-        topicContainer.innerHTML = '';
-        seeMoreTopicsBtn.textContent = 'See More';
-        seeMoreTopicsBtn.classList.remove('disabled');
-        seeMoreTopicsBtn.style.cursor = 'pointer';
-        resetTopicsBtn.style.display = 'none';
-        seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
+        // Initial Loading of Topics and Profiles
         loadMoreTopics();
-    }
+        loadMoreProfiles();
 
-    function checkTopicsPagination() {
-        if (topicIndex >= allTopics.length) {
-            seeMoreTopicsBtn.textContent = 'No more';
-            seeMoreTopicsBtn.classList.add('disabled');
-            seeMoreTopicsBtn.style.cursor = 'default';
-            resetTopicsBtn.style.display = 'inline-block';
-            seeMoreTopicsBtn.removeEventListener('click', loadMoreTopics);
-        } else {
+        // Search Functionality for Topics and Profiles
+        const searchTopicsInput = document.getElementById('searchTopicsInput');
+        const searchProfilesInput = document.getElementById('searchProfilesInput');
+
+        searchTopicsInput.addEventListener('input', filterTopics);
+        searchProfilesInput.addEventListener('input', filterProfiles);
+
+        // Functions for Topics Pagination
+        let topicIndex = 0;
+        const topicContainer = document.getElementById('topicContainer');
+        const seeMoreTopicsBtn = document.getElementById('seeMoreTopicsBtn');
+        const resetTopicsBtn = document.getElementById('resetTopicsBtn');
+
+        seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
+        resetTopicsBtn.addEventListener('click', resetTopics);
+
+        function loadMoreTopics() {
+            const slice = allTopics.slice(topicIndex, topicIndex + chunkSize);
+            slice.forEach(t => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.textContent = t;
+                topicContainer.appendChild(a);
+            });
+            topicIndex += chunkSize;
+            checkTopicsPagination();
+        }
+
+        function resetTopics() {
+            topicIndex = 0;
+            topicContainer.innerHTML = '';
             seeMoreTopicsBtn.textContent = 'See More';
             seeMoreTopicsBtn.classList.remove('disabled');
+            seeMoreTopicsBtn.style.cursor = 'pointer';
+            resetTopicsBtn.style.display = 'none';
+            seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
+            loadMoreTopics();
         }
-    }
 
-    // Functions for Profiles Pagination
-    let profileIndex = 0;
-    const profileContainer = document.getElementById('profileContainer');
-    const seeMoreProfileBtn = document.getElementById('seeMoreProfileBtn');
-    const resetProfileBtn = document.getElementById('resetProfileBtn');
+        function checkTopicsPagination() {
+            if (topicIndex >= allTopics.length) {
+                seeMoreTopicsBtn.textContent = 'No more';
+                seeMoreTopicsBtn.classList.add('disabled');
+                seeMoreTopicsBtn.style.cursor = 'default';
+                resetTopicsBtn.style.display = 'inline-block';
+                seeMoreTopicsBtn.removeEventListener('click', loadMoreTopics);
+            } else {
+                seeMoreTopicsBtn.textContent = 'See More';
+                seeMoreTopicsBtn.classList.remove('disabled');
+            }
+        }
 
-    seeMoreProfileBtn.addEventListener('click', loadMoreProfiles);
-    resetProfileBtn.addEventListener('click', resetProfiles);
+        // Functions for Profiles Pagination
+        let profileIndex = 0;
+        const profileContainer = document.getElementById('profileContainer');
+        const seeMoreProfileBtn = document.getElementById('seeMoreProfileBtn');
+        const resetProfileBtn = document.getElementById('resetProfileBtn');
 
-    function loadMoreProfiles() {
-        const slice = allProfiles.slice(profileIndex, profileIndex + chunkSize);
-        slice.forEach(pf => {
-            const a = document.createElement('a');
-            a.href = "#";
-            a.textContent = pf;
-            profileContainer.appendChild(a);
-        });
-        profileIndex += chunkSize;
-        checkProfilesPagination();
-    }
-
-    function resetProfiles() {
-        profileIndex = 0;
-        profileContainer.innerHTML = '';
-        seeMoreProfileBtn.textContent = 'See More';
-        seeMoreProfileBtn.classList.remove('disabled');
-        seeMoreProfileBtn.style.cursor = 'pointer';
-        resetProfileBtn.style.display = 'none';
         seeMoreProfileBtn.addEventListener('click', loadMoreProfiles);
-        loadMoreProfiles();
-    }
+        resetProfileBtn.addEventListener('click', resetProfiles);
 
-    function checkProfilesPagination() {
-        if (profileIndex >= allProfiles.length) {
-            seeMoreProfileBtn.textContent = 'No more';
-            seeMoreProfileBtn.classList.add('disabled');
-            seeMoreProfileBtn.style.cursor = 'default';
-            resetProfileBtn.style.display = 'inline-block';
-            seeMoreProfileBtn.removeEventListener('click', loadMoreProfiles);
-        } else {
+        function loadMoreProfiles() {
+            const slice = allProfiles.slice(profileIndex, profileIndex + chunkSize);
+            slice.forEach(pf => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.textContent = pf;
+                profileContainer.appendChild(a);
+            });
+            profileIndex += chunkSize;
+            checkProfilesPagination();
+        }
+
+        function resetProfiles() {
+            profileIndex = 0;
+            profileContainer.innerHTML = '';
             seeMoreProfileBtn.textContent = 'See More';
             seeMoreProfileBtn.classList.remove('disabled');
+            seeMoreProfileBtn.style.cursor = 'pointer';
+            resetProfileBtn.style.display = 'none';
+            seeMoreProfileBtn.addEventListener('click', loadMoreProfiles);
+            loadMoreProfiles();
         }
-    }
 
-    // Functions for Filtering Topics and Profiles
-    function filterTopics() {
-        const q = searchTopicsInput.value.toLowerCase();
-        Array.from(topicContainer.querySelectorAll('a')).forEach(a => {
-            if (a.textContent.toLowerCase().includes(q)) {
-                a.classList.remove('hide');
+        function checkProfilesPagination() {
+            if (profileIndex >= allProfiles.length) {
+                seeMoreProfileBtn.textContent = 'No more';
+                seeMoreProfileBtn.classList.add('disabled');
+                seeMoreProfileBtn.style.cursor = 'default';
+                resetProfileBtn.style.display = 'inline-block';
+                seeMoreProfileBtn.removeEventListener('click', loadMoreProfiles);
             } else {
-                a.classList.add('hide');
+                seeMoreProfileBtn.textContent = 'See More';
+                seeMoreProfileBtn.classList.remove('disabled');
             }
-        });
-    }
+        }
 
-    function filterProfiles() {
-        const q = searchProfilesInput.value.toLowerCase();
-        Array.from(profileContainer.querySelectorAll('a')).forEach(a => {
-            if (a.textContent.toLowerCase().includes(q)) {
-                a.classList.remove('hide');
-            } else {
-                a.classList.add('hide');
-            }
-        });
-    }
-
-    // Remove or Comment Out the Fake Data Generation
-    // ------------------------------------------------
-    // Comment out or remove the following fake data generation functions and variables
-    /*
-    // Fake Data Generation (Remove or Comment Out)
-    function randomLikes(max = 1000) {
-        return Math.floor(Math.random() * max);
-    }
-
-    const users = ["L0v3lyy", "User2", "JohnDoe", "Jane", "UserX", "Someone", "User3", "User4", "User5"];
-
-    const descriptions = [
-        "Dumbass looking cat...",
-        "Some random post...",
-        "Beautiful scenery!",
-        "Had a great day at the beach.",
-        "Check out my new artwork.",
-        "Loving this weather!",
-        "Can't believe this happened.",
-        "Throwback to last summer.",
-        "Enjoying my coffee ☕️"
-    ];
-
-    const imageUrls = [
-        "https://via.placeholder.com/600x400/FF5733/ffffff?text=Image1",
-        "https://via.placeholder.com/600x400/33FF57/ffffff?text=Image2",
-        "https://via.placeholder.com/600x400/3357FF/ffffff?text=Image3",
-        "https://via.placeholder.com/600x400/FF33A1/ffffff?text=Image4",
-        "https://via.placeholder.com/600x400/A133FF/ffffff?text=Image5",
-        "https://via.placeholder.com/600x400/33FFA1/ffffff?text=Image6",
-        "https://via.placeholder.com/600x400/FFA133/ffffff?text=Image7",
-        "https://via.placeholder.com/600x400/33A1FF/ffffff?text=Image8",
-        "https://via.placeholder.com/600x400/A1FF33/ffffff?text=Image9"
-    ];
-
-    const commentUsers = ["JohnDoe", "Jane", "UserX", "Someone", "User3", "User4"];
-
-    const commentTexts = [
-        "Wow, cute!",
-        "LOL 😂",
-        "Nice post!",
-        "Where is this?",
-        "Amazing!",
-        "So cool!",
-        "Love this!",
-        "Great shot!",
-        "Beautiful!"
-    ];
-
-    function generateComments() {
-        const comments = [];
-        const numComments = Math.floor(Math.random() * 5); // Max 5 comments
-        for (let i = 0; i < numComments; i++) {
-            comments.push({
-                user: commentUsers[Math.floor(Math.random() * commentUsers.length)],
-                text: commentTexts[Math.floor(Math.random() * commentTexts.length)],
-                time: `${Math.floor(Math.random() * 60)}m` // Comment time in minutes
+        // Functions for Filtering Topics and Profiles
+        function filterTopics() {
+            const q = searchTopicsInput.value.toLowerCase();
+            Array.from(topicContainer.querySelectorAll('a')).forEach(a => {
+                if (a.textContent.toLowerCase().includes(q)) {
+                    a.classList.remove('hide');
+                } else {
+                    a.classList.add('hide');
+                }
             });
         }
-        return comments;
-    }
 
-    function generateImages() {
-        const images = [];
-        const numImages = Math.floor(Math.random() * 5) + 1; // 1 to 5 images per post
-        for (let i = 0; i < numImages; i++) {
-            const randomIndex = Math.floor(Math.random() * imageUrls.length);
-            images.push(imageUrls[randomIndex]);
+        function filterProfiles() {
+            const q = searchProfilesInput.value.toLowerCase();
+            Array.from(profileContainer.querySelectorAll('a')).forEach(a => {
+                if (a.textContent.toLowerCase().includes(q)) {
+                    a.classList.remove('hide');
+                } else {
+                    a.classList.add('hide');
+                }
+            });
         }
-        return images;
-    }
 
-    function generatePosts(totalPosts = 50) {
-        const posts = [];
-        for (let i = 1; i <= totalPosts; i++) {
-            const post = {
-                id: i,
-                user: users[Math.floor(Math.random() * users.length)],
-                time: `${Math.floor(Math.random() * 24)}h`, // Post time in hours
-                desc: descriptions[Math.floor(Math.random() * descriptions.length)],
-                liked: Math.random() < 0.5, // Random true or false
-                comments: generateComments(),
-                likes: randomLikes(),
-                images: generateImages()
-            };
-            posts.push(post);
-        }
-        return posts;
-    }
 
-    let allPosts = generatePosts(100); // Remove this line
-    */
-
-    // Ensure No Duplicate Function Definitions
-    // -----------------------------------------
-    // If you have duplicate functions from previous code, ensure to remove or comment them out to prevent conflicts.
-
-    // -------------------
-});
+    });
 </script>
 
 @endsection

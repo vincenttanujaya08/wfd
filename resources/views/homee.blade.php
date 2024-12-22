@@ -77,13 +77,33 @@
     .menu-btn {
         color: #ccc;
         cursor: pointer;
-
     }
 
-    .post-image img {
+    /* Updated CSS for maintaining aspect ratio */
+    .post-image {
+        position: relative;
         width: 100%;
-        height: auto;
+        padding-top: 100%; /* 1:1 Aspect Ratio (persegi) */
+        overflow: hidden;
+        background: #999; /* Warna latar belakang untuk placeholder */
+    }
+
+    .post-image img, .post-image .no-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
+    }
+
+    .post-image .no-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-weight: bold;
+        font-size: 1rem;
     }
 
     .post-footer {
@@ -225,7 +245,7 @@
                         @if($post->images->count() > 0)
                             <img src="{{ $post->images->first()->path }}" alt="Post Image">
                         @else
-                            <div style="width:100%; height:200px; background:#999; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:1rem;">
+                            <div class="no-image">
                                 No Image
                             </div>
                         @endif
