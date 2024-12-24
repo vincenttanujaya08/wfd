@@ -362,8 +362,8 @@
         padding: 1rem;
         display: flex;
         flex-direction: column;
-        max-height: 80vh;
-        overflow-y: auto;
+        max-height: 80vh; /* Limit the maximum height */
+        overflow: hidden; /* Ensure no overflow affects the modal layout */
     }
 
     .modal-header {
@@ -386,11 +386,26 @@
     }
 
     .comment-list {
-        flex: 1;
+        flex: 1; /* Grow to fill available space */
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        margin-bottom: 1rem;
+        overflow-y: auto; /* Add vertical scrolling */
+        max-height: calc(2.5rem * 5); /* 2.5rem (approx height of one comment) * 5 = Height for 5 comments */
+        margin-bottom: 1rem; /* Space for the comment input */
+        scrollbar-width: thin; /* Modern browsers - thin scrollbar */
+        scrollbar-color: #555 #222; /* Modern browsers - custom scrollbar colors */
+    }
+    /* Optional: Customize scrollbar for webkit browsers (Chrome, Edge, Safari) */
+    .comment-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    .comment-list::-webkit-scrollbar-track {
+        background: #222;
+    }
+    .comment-list::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
     }
 
     .comment-item {
@@ -515,15 +530,18 @@
     <div class="modal">
         <div class="modal-header">
             <h3>Comments</h3>
-            <div class="close-btn" id="closeModal">&times;</div>
+            <span class="close-btn" id="closeModal">&times;</span>
         </div>
-        <div class="comment-list" id="commentList"></div>
+        <div class="modal-body">
+            <div class="comment-list" id="commentList"></div>
+        </div>
         <form class="comment-form" id="commentForm">
-            <input type="text" placeholder="Add a comment..." />
+            <input type="text" placeholder="Add a comment..." required />
             <button type="submit">Post</button>
         </form>
     </div>
 </div>
+
 
 <script>
     // Ensure that the DOM is fully loaded before executing scripts
@@ -756,41 +774,42 @@
         }
 
         // Function to Show Comments in Modal
-        function showComments(postId) {
-            commentList.innerHTML = '';
-            fetch(`/posts/${postId}/comments`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(comment => {
-                        const div = document.createElement('div');
-                        div.classList.add('comment-item');
+        // Show comments in modal
+    function showComments(postId) {
+        currentPostId = postId;
+        commentList.innerHTML = ''; // Clear previous comments
+        commentModal.classList.add('show');
 
-                        const header = document.createElement('div');
-                        header.classList.add('comment-item-header');
-
-                        const userSpan = document.createElement('span');
-                        userSpan.classList.add('comment-user');
-                        userSpan.textContent = comment.user.name;
-
-                        const timeSpan = document.createElement('span');
-                        timeSpan.classList.add('comment-time');
-                        timeSpan.textContent = timeAgo(new Date(comment.created_at));
-
-                        header.appendChild(userSpan);
-                        header.appendChild(timeSpan);
-
-                        const textDiv = document.createElement('div');
-                        textDiv.classList.add('comment-text');
-                        textDiv.textContent = comment.text;
-
-                        div.appendChild(header);
-                        div.appendChild(textDiv);
-
-                        commentList.appendChild(div);
+        fetch(`/posts/${postId}/comments`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                return response.json();
+            })
+            .then(comments => {
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+                } else {
+                    comments.forEach(comment => {
+                        const commentItem = document.createElement('div');
+                        commentItem.classList.add('comment-item');
+                        commentItem.innerHTML = `
+                            <div class="comment-item-header">
+                                <span class="comment-user">${comment.user.name}</span>
+                                <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
+                            </div>
+                            <div class="comment-text">${comment.text}</div>
+                        `;
+                        commentList.appendChild(commentItem);
                     });
-                })
-                .catch(error => console.error('Error fetching comments:', error));
-        }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching comments:', error);
+                commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
+            });
+    }
 
         // Function to Add a Comment
         function addComment(e) {

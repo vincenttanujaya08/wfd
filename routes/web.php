@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Delete Post via AJAX
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/posts/{postId}/comments', [CommentController::class, 'fetchComments'])->name('comments.fetch');
 });
 
 // Login & Logout Routes
