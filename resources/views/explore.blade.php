@@ -119,6 +119,7 @@
 
     .image-slider img {
         width: 100%;
+        height: 20rem;
         display: none;
         object-fit: cover;
     }
