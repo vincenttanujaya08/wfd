@@ -23,7 +23,7 @@
 
     .main-content {
         flex: 1;
-        padding: 2rem;
+        
         box-sizing: border-box;
         background: #111;
     }
