@@ -7,6 +7,7 @@
     
     <!-- Lineicons CDN -->
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
         html, body {
