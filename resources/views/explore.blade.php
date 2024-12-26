@@ -362,8 +362,10 @@
         padding: 1rem;
         display: flex;
         flex-direction: column;
-        max-height: 80vh; /* Limit the maximum height */
-        overflow: hidden; /* Ensure no overflow affects the modal layout */
+        max-height: 80vh;
+        /* Limit the maximum height */
+        overflow: hidden;
+        /* Ensure no overflow affects the modal layout */
     }
 
     .modal-header {
@@ -386,23 +388,32 @@
     }
 
     .comment-list {
-        flex: 1; /* Grow to fill available space */
+        flex: 1;
+        /* Grow to fill available space */
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        overflow-y: auto; /* Add vertical scrolling */
-        max-height: calc(2.5rem * 5); /* 2.5rem (approx height of one comment) * 5 = Height for 5 comments */
-        margin-bottom: 1rem; /* Space for the comment input */
-        scrollbar-width: thin; /* Modern browsers - thin scrollbar */
-        scrollbar-color: #555 #222; /* Modern browsers - custom scrollbar colors */
+        overflow-y: auto;
+        /* Add vertical scrolling */
+        max-height: calc(2.5rem * 5);
+        /* 2.5rem (approx height of one comment) * 5 = Height for 5 comments */
+        margin-bottom: 1rem;
+        /* Space for the comment input */
+        scrollbar-width: thin;
+        /* Modern browsers - thin scrollbar */
+        scrollbar-color: #555 #222;
+        /* Modern browsers - custom scrollbar colors */
     }
+
     /* Optional: Customize scrollbar for webkit browsers (Chrome, Edge, Safari) */
     .comment-list::-webkit-scrollbar {
         width: 8px;
     }
+
     .comment-list::-webkit-scrollbar-track {
         background: #222;
     }
+
     .comment-list::-webkit-scrollbar-thumb {
         background-color: #555;
         border-radius: 4px;
@@ -544,19 +555,13 @@
 
 
 <script>
-    // Ensure that the DOM is fully loaded before executing scripts
     document.addEventListener('DOMContentLoaded', () => {
-        // Select Elements
+        // **Elements Selection**
+        // Posts Elements
         const postContainer = document.getElementById('postContainer');
         const seeMorePostsBtn = document.getElementById('seeMorePostsBtn');
         const resetPostsBtn = document.getElementById('resetPostsBtn');
         const sortSelect = document.getElementById('sortPostsSelect');
-
-        // Pagination and Sorting Variables
-        let currentPage = 1;
-        let currentSort = 'newest';
-        let totalPages = 1;
-        const chunkSize = 3; // You can adjust this based on your preference
 
         // Modal Elements
         const commentModal = document.getElementById('commentModal');
@@ -565,60 +570,61 @@
         const commentForm = document.getElementById('commentForm');
         let currentPostId = null;
 
-        // Initial Load
-        fetchPosts(currentSort, currentPage);
+        // Topics Elements
+        const topicContainer = document.getElementById('topicContainer');
+        const seeMoreTopicsBtn = document.getElementById('seeMoreTopicsBtn');
+        const resetTopicsBtn = document.getElementById('resetTopicsBtn');
+        const searchTopicsInput = document.getElementById('searchTopicsInput');
 
-        // Event Listeners
-        sortSelect.addEventListener('change', () => {
-            currentSort = sortSelect.value;
-            currentPage = 1;
-            postContainer.innerHTML = '';
-            fetchPosts(currentSort, currentPage);
-            resetPostsBtn.style.display = 'none';
-        });
+        // Profiles Elements
+        const profileContainer = document.getElementById('profileContainer');
+        const seeMoreProfileBtn = document.getElementById('seeMoreProfileBtn');
+        const resetProfileBtn = document.getElementById('resetProfileBtn');
+        const searchProfilesInput = document.getElementById('searchProfilesInput');
 
-        seeMorePostsBtn.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                fetchPosts(currentSort, currentPage, true);
-            }
-        });
+        // **State Management**
+        // Posts State
+        let postsState = {
+            currentPage: 1,
+            sort: 'newest',
+            totalPages: 1,
+            limit: 10 // Adjust based on your preference
+        };
 
-        resetPostsBtn.addEventListener('click', () => {
-            currentSort = 'newest';
-            sortSelect.value = 'newest';
-            currentPage = 1;
-            postContainer.innerHTML = '';
-            fetchPosts(currentSort, currentPage);
-            resetPostsBtn.style.display = 'none';
-        });
+        // Topics State
+        let topicsState = {
+            currentPage: 1,
+            lastPage: 1,
+            searchQuery: '',
+            limit: 3
+        };
 
-        closeModal.addEventListener('click', () => {
-            commentModal.classList.remove('show');
-        });
+        // Profiles State
+        let profilesState = {
+            currentPage: 1,
+            lastPage: 1,
+            searchQuery: '',
+            limit: 3
+        };
 
-        commentModal.addEventListener('click', (e) => {
-            if (e.target === commentModal) {
-                commentModal.classList.remove('show');
-            }
-        });
-
-        commentForm.addEventListener('submit', addComment);
-
-        // Function to Fetch Posts from the Server
+        // **Functions to Fetch Posts**
         function fetchPosts(sort, page, append = false) {
             fetch(`/posts?sort=${sort}&page=${page}`)
                 .then(response => response.json())
                 .then(data => {
-                    totalPages = data.last_page;
+                    postsState.totalPages = data.last_page;
 
                     data.data.forEach(post => {
                         const postElement = createPostElement(post);
-                        postContainer.appendChild(postElement);
+                        if (append) {
+                            postContainer.appendChild(postElement);
+                        } else {
+                            postContainer.innerHTML += postElement.outerHTML;
+                        }
                     });
 
                     // Update "See More" and "Reset" Buttons
-                    if (currentPage >= totalPages) {
+                    if (postsState.currentPage >= postsState.totalPages) {
                         seeMorePostsBtn.textContent = "No more";
                         seeMorePostsBtn.classList.add('disabled');
                         seeMorePostsBtn.style.cursor = 'default';
@@ -632,7 +638,174 @@
                 .catch(error => console.error('Error fetching posts:', error));
         }
 
-        // Function to Create a Post Element
+        // **Functions to Fetch Topics**
+        function fetchTopics() {
+            const {
+                currentPage,
+                searchQuery,
+                limit
+            } = topicsState;
+            let url = `/api/topics?page=${currentPage}&limit=${limit}`;
+            if (searchQuery) {
+                url += `&search=${encodeURIComponent(searchQuery)}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    data.data.forEach(topic => {
+                        const a = document.createElement('a');
+                        a.href = "#";
+                        a.textContent = topic.name;
+                        topicContainer.appendChild(a);
+                    });
+
+                    topicsState.lastPage = data.last_page;
+
+                    // Update "See More" and "Reset" Buttons
+                    if (topicsState.currentPage >= topicsState.lastPage) {
+                        seeMoreTopicsBtn.textContent = 'No more';
+                        seeMoreTopicsBtn.classList.add('disabled');
+                        seeMoreTopicsBtn.style.cursor = 'default';
+                        resetTopicsBtn.style.display = 'inline-block';
+                    } else {
+                        seeMoreTopicsBtn.textContent = 'See More';
+                        seeMoreTopicsBtn.classList.remove('disabled');
+                        seeMoreTopicsBtn.style.cursor = 'pointer';
+                    }
+                })
+                .catch(error => console.error('Error fetching topics:', error));
+        }
+
+        // **Functions to Fetch Profiles**
+        function fetchProfiles() {
+            const {
+                currentPage,
+                searchQuery,
+                limit
+            } = profilesState;
+            let url = `/api/users?page=${currentPage}&limit=${limit}`;
+            if (searchQuery) {
+                url += `&search=${encodeURIComponent(searchQuery)}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    data.data.forEach(user => {
+                        const a = document.createElement('a');
+                        a.href = "#";
+                        a.textContent = user.name;
+                        profileContainer.appendChild(a);
+                    });
+
+                    profilesState.lastPage = data.last_page;
+
+                    // Update "See More" and "Reset" Buttons
+                    if (profilesState.currentPage >= profilesState.lastPage) {
+                        seeMoreProfileBtn.textContent = 'No more';
+                        seeMoreProfileBtn.classList.add('disabled');
+                        seeMoreProfileBtn.style.cursor = 'default';
+                        resetProfileBtn.style.display = 'inline-block';
+                    } else {
+                        seeMoreProfileBtn.textContent = 'See More';
+                        seeMoreProfileBtn.classList.remove('disabled');
+                        seeMoreProfileBtn.style.cursor = 'pointer';
+                    }
+                })
+                .catch(error => console.error('Error fetching profiles:', error));
+        }
+
+        // **Event Listeners**
+        // Posts Event Listeners
+        sortSelect.addEventListener('change', () => {
+            postsState.sort = sortSelect.value;
+            postsState.currentPage = 1;
+            postContainer.innerHTML = '';
+            fetchPosts(postsState.sort, postsState.currentPage);
+            resetPostsBtn.style.display = 'none';
+        });
+
+        seeMorePostsBtn.addEventListener('click', () => {
+            if (postsState.currentPage < postsState.totalPages) {
+                postsState.currentPage++;
+                fetchPosts(postsState.sort, postsState.currentPage, true);
+            }
+        });
+
+        resetPostsBtn.addEventListener('click', () => {
+            postsState.sort = 'newest';
+            sortSelect.value = 'newest';
+            postsState.currentPage = 1;
+            postContainer.innerHTML = '';
+            fetchPosts(postsState.sort, postsState.currentPage);
+            resetPostsBtn.style.display = 'none';
+        });
+
+        // Modal Event Listeners
+        closeModal.addEventListener('click', () => {
+            commentModal.classList.remove('show');
+        });
+
+        commentModal.addEventListener('click', (e) => {
+            if (e.target === commentModal) {
+                commentModal.classList.remove('show');
+            }
+        });
+
+        commentForm.addEventListener('submit', addComment);
+
+        // Topics Event Listeners
+        seeMoreTopicsBtn.addEventListener('click', () => {
+            if (topicsState.currentPage < topicsState.lastPage) {
+                topicsState.currentPage++;
+                fetchTopics();
+            }
+        });
+
+        resetTopicsBtn.addEventListener('click', () => {
+            topicsState.currentPage = 1;
+            topicsState.searchQuery = '';
+            topicContainer.innerHTML = '';
+            fetchTopics();
+            resetTopicsBtn.style.display = 'none';
+        });
+
+        searchTopicsInput.addEventListener('input', () => {
+            const query = searchTopicsInput.value.trim();
+            topicsState.searchQuery = query;
+            topicsState.currentPage = 1;
+            topicContainer.innerHTML = '';
+            fetchTopics();
+            resetTopicsBtn.style.display = 'none';
+        });
+
+        // Profiles Event Listeners
+        seeMoreProfileBtn.addEventListener('click', () => {
+            if (profilesState.currentPage < profilesState.lastPage) {
+                profilesState.currentPage++;
+                fetchProfiles();
+            }
+        });
+
+        resetProfileBtn.addEventListener('click', () => {
+            profilesState.currentPage = 1;
+            profilesState.searchQuery = '';
+            profileContainer.innerHTML = '';
+            fetchProfiles();
+            resetProfileBtn.style.display = 'none';
+        });
+
+        searchProfilesInput.addEventListener('input', () => {
+            const query = searchProfilesInput.value.trim();
+            profilesState.searchQuery = query;
+            profilesState.currentPage = 1;
+            profileContainer.innerHTML = '';
+            fetchProfiles();
+            resetProfileBtn.style.display = 'none';
+        });
+
+        // **Functions to Create Post Elements**
         function createPostElement(post) {
             const card = document.createElement('div');
             card.classList.add('post-card');
@@ -642,10 +815,10 @@
             const header = document.createElement('div');
             header.classList.add('post-header');
             header.innerHTML = `
-            <div class="username">${post.user.name}</div>
-            <div class="time">${timeAgo(new Date(post.created_at))}</div>
-            <div class="menu-btn">⋮</div>
-        `;
+                <div class="username">${post.user.name}</div>
+                <div class="time">${timeAgo(new Date(post.created_at))}</div>
+                <div class="menu-btn">⋮</div>
+            `;
             card.appendChild(header);
 
             // Image Slider
@@ -713,15 +886,15 @@
             return card;
         }
 
-        // Function to Update Actions HTML
+        // **Functions to Update Actions HTML**
         function updateActionsHTML(actions, post) {
             actions.innerHTML = `
-            <span class="comment-btn"><i class="lni lni-comments"></i> ${post.comments.length}</span>
-            <span class="like-btn ${post.liked ? 'liked' : ''}"><i class="lni lni-heart"></i> ${post.likes_count}</span>
-        `;
+                <span class="comment-btn"><i class="lni lni-comments"></i> ${post.comments.length}</span>
+                <span class="like-btn ${post.liked ? 'liked' : ''}"><i class="lni lni-heart"></i> ${post.likes_count}</span>
+            `;
         }
 
-        // Function to Slide Images in the Slider
+        // **Functions to Slide Images in the Slider**
         function slideImages(slider, direction) {
             const imgs = slider.querySelectorAll('img');
             let activeIndex = Array.from(imgs).findIndex(img => img.classList.contains('active'));
@@ -732,7 +905,7 @@
             imgs[activeIndex].classList.add('active');
         }
 
-        // Function to Toggle Like
+        // **Function to Toggle Like**
         function toggleLike(postId, card) {
             fetch(`/posts/${postId}/like`, {
                     method: 'POST',
@@ -751,7 +924,7 @@
                 .catch(error => console.error('Error liking post:', error));
         }
 
-        // Function to Display "Time Ago" Format
+        // **Function to Display "Time Ago" Format**
         function timeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
 
@@ -773,45 +946,44 @@
             return "Just now";
         }
 
-        // Function to Show Comments in Modal
-        // Show comments in modal
-    function showComments(postId) {
-        currentPostId = postId;
-        commentList.innerHTML = ''; // Clear previous comments
-        commentModal.classList.add('show');
+        // **Function to Show Comments in Modal**
+        function showComments(postId) {
+            currentPostId = postId;
+            commentList.innerHTML = ''; // Clear previous comments
+            commentModal.classList.add('show');
 
-        fetch(`/posts/${postId}/comments`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch comments');
-                }
-                return response.json();
-            })
-            .then(comments => {
-                if (comments.length === 0) {
-                    commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
-                } else {
-                    comments.forEach(comment => {
-                        const commentItem = document.createElement('div');
-                        commentItem.classList.add('comment-item');
-                        commentItem.innerHTML = `
-                            <div class="comment-item-header">
-                                <span class="comment-user">${comment.user.name}</span>
-                                <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
-                            </div>
-                            <div class="comment-text">${comment.text}</div>
-                        `;
-                        commentList.appendChild(commentItem);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching comments:', error);
-                commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
-            });
-    }
+            fetch(`/posts/${postId}/comments`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch comments');
+                    }
+                    return response.json();
+                })
+                .then(comments => {
+                    if (comments.length === 0) {
+                        commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+                    } else {
+                        comments.forEach(comment => {
+                            const commentItem = document.createElement('div');
+                            commentItem.classList.add('comment-item');
+                            commentItem.innerHTML = `
+                                <div class="comment-item-header">
+                                    <span class="comment-user">${comment.user.name}</span>
+                                    <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
+                                </div>
+                                <div class="comment-text">${comment.text}</div>
+                            `;
+                            commentList.appendChild(commentItem);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching comments:', error);
+                    commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
+                });
+        }
 
-        // Function to Add a Comment
+        // **Function to Add a Comment**
         function addComment(e) {
             e.preventDefault();
             const input = commentForm.querySelector('input');
@@ -842,132 +1014,23 @@
                 .catch(error => console.error('Error adding comment:', error));
         }
 
-        // Initial Loading of Topics and Profiles
-        loadMoreTopics();
-        loadMoreProfiles();
-
-        // Search Functionality for Topics and Profiles
-        const searchTopicsInput = document.getElementById('searchTopicsInput');
-        const searchProfilesInput = document.getElementById('searchProfilesInput');
-
-        searchTopicsInput.addEventListener('input', filterTopics);
-        searchProfilesInput.addEventListener('input', filterProfiles);
-
-        // Functions for Topics Pagination
-        let topicIndex = 0;
-        const topicContainer = document.getElementById('topicContainer');
-        const seeMoreTopicsBtn = document.getElementById('seeMoreTopicsBtn');
-        const resetTopicsBtn = document.getElementById('resetTopicsBtn');
-
-        seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
-        resetTopicsBtn.addEventListener('click', resetTopics);
-
-        function loadMoreTopics() {
-            const slice = allTopics.slice(topicIndex, topicIndex + chunkSize);
-            slice.forEach(t => {
-                const a = document.createElement('a');
-                a.href = "#";
-                a.textContent = t;
-                topicContainer.appendChild(a);
-            });
-            topicIndex += chunkSize;
-            checkTopicsPagination();
+        // **Functions to Load Topics and Profiles Initially**
+        function fetchAndInitializeTopics() {
+            fetchTopics();
         }
 
-        function resetTopics() {
-            topicIndex = 0;
-            topicContainer.innerHTML = '';
-            seeMoreTopicsBtn.textContent = 'See More';
-            seeMoreTopicsBtn.classList.remove('disabled');
-            seeMoreTopicsBtn.style.cursor = 'pointer';
-            resetTopicsBtn.style.display = 'none';
-            seeMoreTopicsBtn.addEventListener('click', loadMoreTopics);
-            loadMoreTopics();
+        function fetchAndInitializeProfiles() {
+            fetchProfiles();
         }
 
-        function checkTopicsPagination() {
-            if (topicIndex >= allTopics.length) {
-                seeMoreTopicsBtn.textContent = 'No more';
-                seeMoreTopicsBtn.classList.add('disabled');
-                seeMoreTopicsBtn.style.cursor = 'default';
-                resetTopicsBtn.style.display = 'inline-block';
-                seeMoreTopicsBtn.removeEventListener('click', loadMoreTopics);
-            } else {
-                seeMoreTopicsBtn.textContent = 'See More';
-                seeMoreTopicsBtn.classList.remove('disabled');
-            }
-        }
+        // **Initial Load**
+        fetchPosts(postsState.sort, postsState.currentPage);
+        fetchAndInitializeTopics();
+        fetchAndInitializeProfiles();
 
-        // Functions for Profiles Pagination
-        let profileIndex = 0;
-        const profileContainer = document.getElementById('profileContainer');
-        const seeMoreProfileBtn = document.getElementById('seeMoreProfileBtn');
-        const resetProfileBtn = document.getElementById('resetProfileBtn');
-
-        seeMoreProfileBtn.addEventListener('click', loadMoreProfiles);
-        resetProfileBtn.addEventListener('click', resetProfiles);
-
-        function loadMoreProfiles() {
-            const slice = allProfiles.slice(profileIndex, profileIndex + chunkSize);
-            slice.forEach(pf => {
-                const a = document.createElement('a');
-                a.href = "#";
-                a.textContent = pf;
-                profileContainer.appendChild(a);
-            });
-            profileIndex += chunkSize;
-            checkProfilesPagination();
-        }
-
-        function resetProfiles() {
-            profileIndex = 0;
-            profileContainer.innerHTML = '';
-            seeMoreProfileBtn.textContent = 'See More';
-            seeMoreProfileBtn.classList.remove('disabled');
-            seeMoreProfileBtn.style.cursor = 'pointer';
-            resetProfileBtn.style.display = 'none';
-            seeMoreProfileBtn.addEventListener('click', loadMoreProfiles);
-            loadMoreProfiles();
-        }
-
-        function checkProfilesPagination() {
-            if (profileIndex >= allProfiles.length) {
-                seeMoreProfileBtn.textContent = 'No more';
-                seeMoreProfileBtn.classList.add('disabled');
-                seeMoreProfileBtn.style.cursor = 'default';
-                resetProfileBtn.style.display = 'inline-block';
-                seeMoreProfileBtn.removeEventListener('click', loadMoreProfiles);
-            } else {
-                seeMoreProfileBtn.textContent = 'See More';
-                seeMoreProfileBtn.classList.remove('disabled');
-            }
-        }
-
-        // Functions for Filtering Topics and Profiles
-        function filterTopics() {
-            const q = searchTopicsInput.value.toLowerCase();
-            Array.from(topicContainer.querySelectorAll('a')).forEach(a => {
-                if (a.textContent.toLowerCase().includes(q)) {
-                    a.classList.remove('hide');
-                } else {
-                    a.classList.add('hide');
-                }
-            });
-        }
-
-        function filterProfiles() {
-            const q = searchProfilesInput.value.toLowerCase();
-            Array.from(profileContainer.querySelectorAll('a')).forEach(a => {
-                if (a.textContent.toLowerCase().includes(q)) {
-                    a.classList.remove('hide');
-                } else {
-                    a.classList.add('hide');
-                }
-            });
-        }
-
-
+        // **Note:** All other functions and event listeners are already handled above.
     });
 </script>
+
 
 @endsection
