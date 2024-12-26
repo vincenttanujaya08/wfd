@@ -10,7 +10,6 @@ use App\Models\Image;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Comment;
 
 class PostController extends Controller
 {
@@ -193,36 +192,29 @@ class PostController extends Controller
         return response()->json($posts);
     }
 
-    public function getDetails($id)
+    // PostController.php
+    public function getPosts(Request $request)
     {
-        $post = Post::with(['comments.user', 'likes.user'])->findOrFail($id);
-    
-        return response()->json([
-            'comments' => $post->comments->where('hidden', 0)->map(function ($comment) {
-                return [
-                    'id' => $comment->id,
-                    'user' => $comment->user->name,
-                    'text' => $comment->text,
-                ];
-            }),
-            'likes' => $post->likes->map(function ($like) {
-                return [
-                    'user' => $like->user->name,
-                ];
-            }),
-        ]);
-    }
+        $query = Post::query();
 
-    public function hideComment(Request $request, $id)
-    {
-        $comment = Comment::find($id);
-        if ($comment) {
-            $comment->hidden = 1;
-            $comment->save();
-    
-            return response()->json(['message' => 'Comment hidden successfully']);
+        // Filter by topic if topic_id is provided
+        if ($request->has('topic_id')) {
+            $query->whereHas('topics', function ($q) use ($request) {
+                $q->where('id', $request->input('topic_id'));
+            });
         }
-    
-        return response()->json(['message' => 'Comment not found'], 404);
+
+        // Apply sorting
+        if ($request->input('sort') === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($request->input('sort') === 'popular') {
+            $query->orderBy('likes_count', 'desc'); // Assuming `likes_count` exists
+        } else {
+            $query->orderBy('created_at', 'desc'); // Default: newest
+        }
+
+        $posts = $query->paginate(10); // Pagination to control results
+
+        return response()->json($posts);
     }
 }

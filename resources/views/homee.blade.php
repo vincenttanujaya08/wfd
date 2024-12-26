@@ -2,6 +2,7 @@
 
 @section('content')
 <style>
+    /* Existing CSS */
     html, body {
         margin: 0;
         padding: 0;
@@ -15,32 +16,34 @@
     .content-wrapper {
         display: flex;
         width: 100%;
-        min-height: 100vh;
+        min-height: 100vh; 
         box-sizing: border-box;
-        background: #111;
+        background: #111; 
     }
 
     .main-content {
         flex: 1;
+        
         box-sizing: border-box;
         background: #111;
     }
 
+    /* Responsive Layout for Posts */
     #userPostsContainer {
         display: grid;
         gap: 2rem;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Default 1 column */
     }
 
     @media (min-width: 768px) {
         #userPostsContainer {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr); /* ≥768px: 2 columns */
         }
     }
 
     @media (min-width: 1024px) {
         #userPostsContainer {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, 1fr); /* ≥1024px: 3 columns */
         }
     }
 
@@ -49,6 +52,7 @@
         border-radius: 8px;
         overflow: hidden;
         border: 1px solid #333;
+        position: relative;
         display: flex;
         flex-direction: column;
     }
@@ -75,12 +79,13 @@
         cursor: pointer;
     }
 
+    /* Updated CSS for maintaining aspect ratio */
     .post-image {
         position: relative;
         width: 100%;
-        padding-top: 100%;
+        padding-top: 100%; /* 1:1 Aspect Ratio (persegi) */
         overflow: hidden;
-        background: #999;
+        background: #999; /* Warna latar belakang untuk placeholder */
     }
 
     .post-image img, .post-image .no-image {
@@ -112,13 +117,13 @@
         color: #ccc;
         margin-bottom: 0.5rem;
         word-wrap: break-word;
-        font-size: 0.9rem;
+        font-size:0.9rem;
     }
 
     .post-footer .description .edited {
-        color: #888;
-        font-size: 0.8rem;
-        margin-left: 0.3rem;
+        color:#888;
+        font-size:0.8rem;
+        margin-left:0.3rem;
     }
 
     .post-footer .actions {
@@ -127,31 +132,29 @@
         justify-content: flex-end;
         color: #ccc;
         font-size: 0.9rem;
-        gap: 0.5rem;
+        gap:0.5rem;
     }
 
     .actions button {
-        background: #444;
-        color: #ccc;
-        border: none;
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.8rem;
+        background:#444;
+        color:#ccc;
+        border:none;
+        padding:0.3rem 0.5rem;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:0.8rem;
     }
 
     .actions button:hover {
-        background: #555;
+        background:#555;
     }
 
+    /* Modal without internal scroll */
     .modal-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
+        top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.7);
         z-index: 9999;
         justify-content: center;
         align-items: center;
@@ -165,82 +168,65 @@
         background: #222;
         border: 1px solid #333;
         border-radius: 8px;
-        width: 90%;
-        max-width: 900px;
+        width: 100%;
+        max-width: 400px;
         padding: 1rem;
         display: flex;
-        flex-direction: row;
-        color: #ccc;
-        gap: 1rem;
-    }
-
-    .modal-image {
-        flex: 2;
-        background: #333;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .modal-details {
-        flex: 3;
-        display: flex;
         flex-direction: column;
-        gap: 1rem;
     }
 
-    .comments-container,
-    .likes-container {
-        max-height: 150px;
-        overflow-y: auto;
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
     }
 
-    .comments-container table {
-        width: 100%;
-        border-collapse: collapse;
-        color: #ccc;
-    }
-
-    .comments-container th, .comments-container td {
-        border: 1px solid #444;
-        padding: 0.5rem;
-        text-align: left;
-        vertical-align: top;
-    }
-
-    .likes-container ul {
-        list-style: none;
-        padding: 0;
+    .modal-header h3 {
         margin: 0;
-    }
-
-    .likes-container li {
-        margin-bottom: 0.5rem;
-    }
-
-    .hide-comment-btn {
-        background: #444;
+        font-size: 1.1rem;
         color: #ccc;
-        border: none;
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
+    }
+
+    .modal-header .close-btn {
         cursor: pointer;
+        color: #ccc;
+        font-size: 1.5rem;
     }
 
-    .hide-comment-btn:hover {
-        background: #555;
+    .modal-body {
+        margin-bottom:1rem;
     }
 
-    @media (max-width: 768px) {
-        .modal {
-            flex-direction: column;
-        }
+    .modal-body textarea {
+        width:100%;
+        background:#333;
+        border:1px solid #444;
+        border-radius:4px;
+        color:#ccc;
+        padding:0.5rem;
+        resize:vertical;
+        min-height:100px;
+    }
+
+    .modal-actions {
+        display:flex;
+        justify-content:flex-end;
+        gap:0.5rem;
+    }
+
+    .modal-actions button {
+        background:#444;
+        color:#ccc;
+        border:none;
+        padding:0.5rem 1rem;
+        border-radius:4px;
+        cursor:pointer;
+        font-size:0.9rem;
+    }
+
+    .modal-actions button:hover {
+        background:#555;
     }
 </style>
 
@@ -259,7 +245,9 @@
                         @if($post->images->count() > 0)
                             <img src="{{ $post->images->first()->path }}" alt="Post Image">
                         @else
-                            <div class="no-image">No Image</div>
+                            <div class="no-image">
+                                No Image
+                            </div>
                         @endif
                     </div>
                     <div class="post-footer">
@@ -282,84 +270,139 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="postModalOverlay">
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
     <div class="modal">
-        <div class="modal-image" id="postModalImage"></div>
-        <div class="modal-details">
-            <div class="comments-container">
-                <h4>Comments</h4>
-                <table>
-                    <tbody id="commentsList"></tbody>
-                </table>
-            </div>
-            <div class="likes-container">
-                <h4>Likes</h4>
-                <ul id="likesList"></ul>
-            </div>
+        <div class="modal-header">
+            <h3>Edit Post</h3>
+            <div class="close-btn" id="closeModalBtn">&times;</div>
+        </div>
+        <div class="modal-body">
+            <textarea id="editCaption" placeholder="Edit your caption..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button id="cancelEditBtn">Cancel</button>
+            <button id="saveEditBtn">Save</button>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const modalOverlay = document.getElementById('postModalOverlay');
-    const modalImage = document.getElementById('postModalImage');
-    const commentsList = document.getElementById('commentsList');
-    const likesList = document.getElementById('likesList');
+    document.addEventListener('DOMContentLoaded', () => {
+        const editModal = document.getElementById('editModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const editCaption = document.getElementById('editCaption');
+        let currentEditPostId = null;
+        let currentEditCard = null;
 
-    document.querySelectorAll('.post-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const postId = card.getAttribute('data-post-id');
-            const imageSrc = card.querySelector('.post-image img')?.src || 'No Image';
+        // Open Edit Modal
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
+                const description = card.querySelector('.description').innerText.replace('(Edited)', '').trim();
 
-            modalImage.innerHTML = imageSrc !== 'No Image' ? `<img src="${imageSrc}" alt="Post Image">` : '<div>No Image</div>';
+                currentEditPostId = postId;
+                currentEditCard = card;
+                editCaption.value = description;
+                editModal.classList.add('show');
+            });
+        });
 
-            fetch(`/posts/${postId}/details`)
-                .then(res => res.json())
-                .then(data => {
-                    commentsList.innerHTML = '';
-                    data.comments.forEach(comment => {
-                        commentsList.innerHTML += `
-                            <tr>
-                                <td>${comment.user}</td>
-                                <td>${comment.text}</td>
-                                <td><button class="hide-comment-btn" data-id="${comment.id}">Hide</button></td>
-                            </tr>
-                        `;
+        // Close Modal Functions
+        const closeModal = () => {
+            editModal.classList.remove('show');
+            currentEditPostId = null;
+            currentEditCard = null;
+            editCaption.value = '';
+        };
+
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelEditBtn.addEventListener('click', closeModal);
+
+        // Save Edited Caption
+        saveEditBtn.addEventListener('click', () => {
+            const newDescription = editCaption.value.trim();
+
+            if(newDescription === '') {
+                alert('Caption cannot be empty.');
+                return;
+            }
+
+            // Send AJAX request to update the caption
+            fetch(`/posts/${currentEditPostId}/edit`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ description: newDescription })
+            })
+            .then(response => {
+                if(response.ok){
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update the post.');
+                }
+            })
+            .then(data => {
+                // Update the caption in the UI
+                const descDiv = currentEditCard.querySelector('.description');
+                descDiv.textContent = data.description;
+                // Append "(Edited)" if not already present
+                if(!descDiv.innerHTML.includes('(Edited)')){
+                    const editedSpan = document.createElement('span');
+                    editedSpan.classList.add('edited');
+                    editedSpan.textContent = ' (Edited)';
+                    descDiv.appendChild(editedSpan);
+                }
+                // Close the modal
+                closeModal();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('An error occurred while updating the post.');
+            });
+        });
+
+        // Delete Post
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
+
+                if(confirm('Are you sure you want to delete this post?')){
+                    // Send AJAX request to delete the post
+                    fetch(`/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if(response.ok){
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to delete the post.');
+                        }
+                    })
+                    .then(data => {
+                        // Remove the post card from the UI
+                        card.remove();
+                        alert(data.message);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the post.');
                     });
-
-                    document.querySelectorAll('.hide-comment-btn').forEach(btn => {
-                        btn.addEventListener('click', e => {
-                            const id = e.target.getAttribute('data-id');
-                            fetch(`/comments/${id}/hide`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                }
-                            }).then(res => {
-                                if (res.ok) {
-                                    e.target.closest('tr').remove();
-                                } else {
-                                    console.error('Failed to hide the comment');
-                                }
-                            });
-                        });
-                    });
-
-                    likesList.innerHTML = '';
-                    data.likes.forEach(like => {
-                        likesList.innerHTML += `<li>${like.user}</li>`;
-                    });
-
-                    modalOverlay.classList.add('show');
-                });
+                }
+            });
         });
     });
-
-    document.getElementById('closePostModal').addEventListener('click', () => {
-        modalOverlay.classList.remove('show');
-    });
-});
 </script>
 @endsection
