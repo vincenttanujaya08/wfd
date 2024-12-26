@@ -81,6 +81,7 @@
         padding-top: 100%;
         overflow: hidden;
         background: #999;
+        cursor: pointer; /* Menambahkan pointer untuk gambar */
     }
 
     .post-image img, .post-image .no-image {
@@ -197,8 +198,13 @@
 
     .comments-container,
     .likes-container {
-        max-height: 150px;
+        max-height: 120px;
         overflow-y: auto;
+        padding: 0.5rem;
+        border: 1px solid #333;
+        border-radius: 4px;
+        background: #111;
+        margin-top: 1rem;
     }
 
     .comments-container table {
@@ -257,9 +263,9 @@
                     </div>
                     <div class="post-image">
                         @if($post->images->count() > 0)
-                            <img src="{{ $post->images->first()->path }}" alt="Post Image">
+                            <img src="{{ $post->images->first()->path }}" alt="Post Image" class="image-modal-trigger">
                         @else
-                            <div class="no-image">No Image</div>
+                            <div class="no-image image-modal-trigger">No Image</div>
                         @endif
                     </div>
                     <div class="post-footer">
@@ -286,6 +292,9 @@
     <div class="modal">
         <div class="modal-image" id="postModalImage"></div>
         <div class="modal-details">
+            <div>
+                <button id="closePostModal" style="background:#800; color:#fff; border:none; padding:0.5rem; border-radius:4px; cursor:pointer;">Close</button>
+            </div>
             <div class="comments-container">
                 <h4>Comments</h4>
                 <table>
@@ -306,58 +315,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalImage = document.getElementById('postModalImage');
     const commentsList = document.getElementById('commentsList');
     const likesList = document.getElementById('likesList');
+    const closePostModal = document.getElementById('closePostModal');
 
-    document.querySelectorAll('.post-card').forEach(card => {
-        card.addEventListener('click', () => {
+    document.querySelectorAll('.image-modal-trigger').forEach(image => {
+        image.addEventListener('click', (e) => {
+            e.stopPropagation(); // Mencegah event bubbling
+            const card = image.closest('.post-card');
             const postId = card.getAttribute('data-post-id');
-            const imageSrc = card.querySelector('.post-image img')?.src || 'No Image';
+            const imageSrc = image.tagName === 'IMG' ? image.src : null;
 
-            modalImage.innerHTML = imageSrc !== 'No Image' ? `<img src="${imageSrc}" alt="Post Image">` : '<div>No Image</div>';
+            modalImage.innerHTML = imageSrc ? `<img src="${imageSrc}" alt="Post Image">` : '<div>No Image</div>';
 
             fetch(`/posts/${postId}/details`)
                 .then(res => res.json())
                 .then(data => {
                     commentsList.innerHTML = '';
-                    data.comments.forEach(comment => {
-                        commentsList.innerHTML += `
-                            <tr>
-                                <td>${comment.user}</td>
-                                <td>${comment.text}</td>
-                                <td><button class="hide-comment-btn" data-id="${comment.id}">Hide</button></td>
-                            </tr>
-                        `;
-                    });
-
-                    document.querySelectorAll('.hide-comment-btn').forEach(btn => {
-                        btn.addEventListener('click', e => {
-                            const id = e.target.getAttribute('data-id');
-                            fetch(`/comments/${id}/hide`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                }
-                            }).then(res => {
-                                if (res.ok) {
-                                    e.target.closest('tr').remove();
-                                } else {
-                                    console.error('Failed to hide the comment');
-                                }
-                            });
+                    if (data.comments.length > 0) {
+                        data.comments.forEach(comment => {
+                            commentsList.innerHTML += `
+                                <tr>
+                                    <td>${comment.user}</td>
+                                    <td>${comment.text}</td>
+                                    <td><button class="hide-comment-btn" data-id="${comment.id}">Hide</button></td>
+                                </tr>
+                            `;
                         });
-                    });
+                    } else {
+                        commentsList.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">No comments available.</td></tr>';
+                    }
 
                     likesList.innerHTML = '';
-                    data.likes.forEach(like => {
-                        likesList.innerHTML += `<li>${like.user}</li>`;
-                    });
+                    if (data.likes.length > 0) {
+                        data.likes.forEach(like => {
+                            likesList.innerHTML += `<li>${like.user}</li>`;
+                        });
+                    } else {
+                        likesList.innerHTML = '<li style="text-align:center; color:#888;">No likes available.</li>';
+                    }
 
                     modalOverlay.classList.add('show');
                 });
         });
     });
 
-    document.getElementById('closePostModal').addEventListener('click', () => {
+    closePostModal.addEventListener('click', () => {
         modalOverlay.classList.remove('show');
     });
 });
