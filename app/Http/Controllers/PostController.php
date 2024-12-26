@@ -191,30 +191,4 @@ class PostController extends Controller
 
         return response()->json($posts);
     }
-
-    // PostController.php
-    public function getPosts(Request $request)
-    {
-        $query = Post::query();
-
-        // Filter by topic if topic_id is provided
-        if ($request->has('topic_id')) {
-            $query->whereHas('topics', function ($q) use ($request) {
-                $q->where('id', $request->input('topic_id'));
-            });
-        }
-
-        // Apply sorting
-        if ($request->input('sort') === 'oldest') {
-            $query->orderBy('created_at', 'asc');
-        } elseif ($request->input('sort') === 'popular') {
-            $query->orderBy('likes_count', 'desc'); // Assuming `likes_count` exists
-        } else {
-            $query->orderBy('created_at', 'desc'); // Default: newest
-        }
-
-        $posts = $query->paginate(10); // Pagination to control results
-
-        return response()->json($posts);
-    }
 }
