@@ -287,6 +287,141 @@
         </div>
     </div>
 </div>
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit Post</h3>
+            <div class="close-btn" id="closeModalBtn">&times;</div>
+        </div>
+        <div class="modal-body">
+            <textarea id="editCaption" placeholder="Edit your caption..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button id="cancelEditBtn">Cancel</button>
+            <button id="saveEditBtn">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editModal = document.getElementById('editModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const editCaption = document.getElementById('editCaption');
+        let currentEditPostId = null;
+        let currentEditCard = null;
+
+        // Open Edit Modal
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
+                const description = card.querySelector('.description').innerText.replace('(Edited)', '').trim();
+
+                currentEditPostId = postId;
+                currentEditCard = card;
+                editCaption.value = description;
+                editModal.classList.add('show');
+            });
+        });
+
+        // Close Modal Functions
+        const closeModal = () => {
+            editModal.classList.remove('show');
+            currentEditPostId = null;
+            currentEditCard = null;
+            editCaption.value = '';
+        };
+
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelEditBtn.addEventListener('click', closeModal);
+
+        // Save Edited Caption
+        saveEditBtn.addEventListener('click', () => {
+            const newDescription = editCaption.value.trim();
+
+            if(newDescription === '') {
+                alert('Caption cannot be empty.');
+                return;
+            }
+
+            // Send AJAX request to update the caption
+            fetch(`/posts/${currentEditPostId}/edit`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ description: newDescription })
+            })
+            .then(response => {
+                if(response.ok){
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update the post.');
+                }
+            })
+            .then(data => {
+                // Update the caption in the UI
+                const descDiv = currentEditCard.querySelector('.description');
+                descDiv.textContent = data.description;
+                // Append "(Edited)" if not already present
+                if(!descDiv.innerHTML.includes('(Edited)')){
+                    const editedSpan = document.createElement('span');
+                    editedSpan.classList.add('edited');
+                    editedSpan.textContent = ' (Edited)';
+                    descDiv.appendChild(editedSpan);
+                }
+                // Close the modal
+                closeModal();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('An error occurred while updating the post.');
+            });
+        });
+
+        // Delete Post
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card');
+                const postId = card.getAttribute('data-post-id');
+
+                if(confirm('Are you sure you want to delete this post?')){
+                    // Send AJAX request to delete the post
+                    fetch(`/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if(response.ok){
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to delete the post.');
+                        }
+                    })
+                    .then(data => {
+                        // Remove the post card from the UI
+                        card.remove();
+                        alert(data.message);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('An error occurred while deleting the post.');
+                    });
+                }
+            });
+        });
+    });
+</script>
 
 <div class="modal-overlay" id="postModalOverlay">
     <div class="modal">
