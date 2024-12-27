@@ -31,9 +31,9 @@ Route::get('/explore', function () {
     return view('explore');
 })->name('explore');
 
-Route::get('/notification', function () {
-    return view('notification');
-})->name('notification');
+// Route::get('/notification', function () {
+//     return view('notification');
+// })->name('notification');
 
 // Routes that require authentication
 Route::middleware(['auth'])->group(function () {
@@ -89,6 +89,8 @@ Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])-
 
 //Notification
 Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCount'])->name('notifications.unread-count');
+Route::get('/notification', [PostController::class, 'getNotifications'])->name('notification');
+Route::post('/clear-notifications', [PostController::class, 'clearNotifications'])->name('clear.notifications');
 
 
 //Update status public private
