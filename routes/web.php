@@ -10,6 +10,8 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Notifications\Notification;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,8 +91,8 @@ Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])-
 
 //Notification
 Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCount'])->name('notifications.unread-count');
-Route::get('/notification', [PostController::class, 'getNotifications'])->name('notification');
-Route::post('/clear-notifications', [PostController::class, 'clearNotifications'])->name('clear.notifications');
+Route::get('/notification', [NotificationController::class, 'getNotifications'])->name('notification');
+Route::post('/clear-notifications', [NotificationController::class, 'clearNotifications'])->name('clear.notifications');
 
 
 //Update status public private
