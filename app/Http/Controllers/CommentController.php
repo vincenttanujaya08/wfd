@@ -13,6 +13,7 @@ class CommentController extends Controller
     public function fetchComments($postId)
     {
         $comments = Comment::where('post_id', $postId)
+            ->where('hide', false)
             ->with('user') // Include user details
             ->latest() // Order by newest comments first
             ->get();
