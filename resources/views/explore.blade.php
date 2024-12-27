@@ -782,6 +782,7 @@
         // Function to Show Comments in Modal
         // Show comments in modal
         function showComments(postId) {
+            
     currentPostId = postId;
     commentList.innerHTML = ''; // Clear previous comments
 
