@@ -30,18 +30,28 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+       
+
+        // Validate the request data (optional if StorePostRequest already validates it)
+        $validated = $request->validate([
+            'description' => 'required|string|max:255',
+            'status' => 'required|in:public,private',
+            'topic' => 'nullable|string|max:255',
+            'image_links.*' => 'nullable|url',
+        ]);
+    
         // Step 1: Create the post
         $post = Post::create([
             'user_id' => auth()->id(),
             'description' => $request->description,
+            'status' => $request->status === 'public' ? 1 : 0, // Map public/private to 1/0
             'likes_count' => 0, // Initialize likes_count
         ]);
-
+    
         // Step 2: Handle topics
         $topicIds = [];
-
+    
         if (!empty($request->topic)) {
-            // Assuming only one topic based on your form input
             $topicName = trim($request->topic);
             if ($topicName !== '') {
                 $topic = Topic::firstOrCreate(
@@ -51,12 +61,12 @@ class PostController extends Controller
                 $topicIds[] = $topic->id;
             }
         }
-
+    
         // Attach topics to the post
         if (!empty($topicIds)) {
             $post->topics()->sync($topicIds);
         }
-
+    
         // Step 3: Handle images
         if (!empty($request->image_links)) {
             foreach ($request->image_links as $imageLink) {
@@ -66,9 +76,12 @@ class PostController extends Controller
                 ]);
             }
         }
-
+    
+        // Redirect back with success message
         return redirect()->route('upload')->with('success', 'Post created successfully!');
     }
+    
+    
 
     /**
      * Like or unlike a post.
@@ -329,5 +342,19 @@ public function hideComment($id)
             'unread_notifications_count' => $totalUnreadCount,
         ]);
     }
+
+    public function toggleStatus(Post $post, Request $request)
+{
+    // Toggle status
+    $post->status = $post->status === 1 ? 0 : 1;
+    $post->save();
+
+    // Return response
+    return response()->json([
+        'status' => $post->status,
+        'message' => 'Post status updated successfully!',
+    ]);
+}
+
 
 }

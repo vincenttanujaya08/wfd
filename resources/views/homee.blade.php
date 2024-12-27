@@ -395,7 +395,35 @@
     border-radius: 4px;
     padding: 0.5rem;
 }
+.status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+        border-radius: 4px;
+        text-transform: uppercase;
+        margin-left: 10px;
+    }
 
+    .status-public {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .status-private {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .menu-btn {
+        color: #ccc;
+        cursor: pointer;
+        font-size: 1.5rem;
+    }
+
+    .menu-btn:hover {
+        color: #fff;
+    }
 
 </style>
 
@@ -405,11 +433,22 @@
         <div id="userPostsContainer">
             @forelse($posts as $post)
                 <div class="post-card" data-post-id="{{ $post->id }}">
-                    <div class="post-header">
-                        <div class="username">{{ $post->user->name }}</div>
-                        <div class="time">{{ $post->created_at->diffForHumans() }}</div>
-                        <div class="menu-btn">⋮</div>
-                    </div>
+                <div class="post-header">
+    <div class="username">{{ $post->user->name }}</div>
+    <div class="time">{{ $post->created_at->diffForHumans() }}</div>
+
+    <!-- Status Indicator -->
+    <div class="status-indicator" style="margin-right: 10px;">
+        <span
+            class="status-badge {{ $post->status == 1 ? 'status-public' : 'status-private' }}"
+            data-post-id="{{ $post->id }}"
+            style="cursor: pointer;"
+        >
+            {{ $post->status == 1 ? 'Public' : 'Private' }}
+        </span>
+    </div>
+
+</div>
                     <div class="post-image">
                         @if($post->images->count() > 0)
                             <img src="{{ $post->images->first()->path }}" alt="Post Image" class="image-modal-trigger">
@@ -823,4 +862,49 @@ const hideCommentHandler = (e) => {
 });
 
 </script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Attach click event to status badges
+    document.querySelectorAll('.status-badge').forEach((badge) => {
+        badge.addEventListener('click', (e) => {
+            const postId = badge.getAttribute('data-post-id');
+            const currentStatus = badge.textContent.trim().toLowerCase(); // Get current status
+
+            // Confirm action
+            const confirmation = confirm(`Do you want to make this post ${currentStatus === 'public' ? 'private' : 'public'}?`);
+            if (!confirmation) return;
+
+            // Send AJAX request to update the status
+            fetch(`/posts/${postId}/toggle-status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({ status: currentStatus === 'public' ? 'private' : 'public' }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update status');
+                }
+            })
+            .then(data => {
+                // Update the badge
+                badge.textContent = data.status === 1 ? 'Public' : 'Private';
+                badge.classList.toggle('status-public', data.status === 1);
+                badge.classList.toggle('status-private', data.status === 0);
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                alert('An error occurred while updating the status.');
+            });
+        });
+    });
+});
+</script>
+
 @endsection

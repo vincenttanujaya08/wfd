@@ -91,6 +91,10 @@ Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])-
 Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
 
+//Update status public private
+Route::patch('/posts/{post}/toggle-status', [PostController::class, 'toggleStatus'])->name('posts.toggleStatus');
+
+
 // Database test route (for checking DB connection)
 Route::get('/db-test', function () {
     try {
