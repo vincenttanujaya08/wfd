@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ReplyController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SignupController;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +94,8 @@ Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCoun
 
 //Update status public private
 Route::patch('/posts/{post}/toggle-status', [PostController::class, 'toggleStatus'])->name('posts.toggleStatus');
+Route::post('/comments/{commentId}/replies', [ReplyController::class, 'store'])->name('replies.store');
+    Route::get('/comments/{commentId}/replies', [ReplyController::class, 'fetchReplies'])->name('replies.fetch');
 
 
 // Database test route (for checking DB connection)

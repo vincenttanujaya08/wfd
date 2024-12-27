@@ -775,41 +775,121 @@
 
         // Function to Show Comments in Modal
         // Show comments in modal
-    function showComments(postId) {
-        currentPostId = postId;
-        commentList.innerHTML = ''; // Clear previous comments
-        commentModal.classList.add('show');
+        function showComments(postId) {
+    currentPostId = postId; // Set the current post ID
+    commentList.innerHTML = ''; // Clear previous comments
+    commentModal.classList.add('show'); // Show the modal
 
-        fetch(`/posts/${postId}/comments`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch comments');
-                }
-                return response.json();
+    // Fetch comments for the specific post
+    fetch(`/posts/${postId}/comments`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch comments');
+            }
+            return response.json();
+        })
+        .then(comments => {
+            if (comments.length === 0) {
+                commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+            } else {
+                comments.forEach(comment => {
+                    const commentElement = createCommentWithReplies(comment);
+                    commentList.appendChild(commentElement);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching comments:', error);
+            commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
+        });
+}
+
+// Create a comment element with reply functionality
+function createCommentWithReplies(comment) {
+    const commentItem = document.createElement('div');
+    commentItem.classList.add('comment-item');
+    commentItem.innerHTML = `
+        <div class="comment-item-header">
+            <span class="comment-user">${comment.user.name}</span>
+            <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
+        </div>
+        <div class="comment-text">${comment.text}</div>
+        <div class="comment-actions">
+            <button class="reply-btn" data-comment-id="${comment.id}">Reply</button>
+        </div>
+        <div class="replies-list" id="replies-${comment.id}" style="margin-left: 20px; margin-top: 10px;"></div>
+        <form class="reply-form" id="reply-form-${comment.id}" style="display: none; margin-top: 10px;">
+            <input type="text" placeholder="Write a reply..." required />
+            <button type="submit">Reply</button>
+        </form>
+    `;
+
+    const replyBtn = commentItem.querySelector('.reply-btn');
+    const replyForm = commentItem.querySelector(`#reply-form-${comment.id}`);
+    const repliesList = commentItem.querySelector(`#replies-${comment.id}`);
+
+    // Toggle reply form visibility
+    replyBtn.addEventListener('click', () => {
+        replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        if (replyForm.style.display === 'block') {
+            fetchReplies(comment.id, repliesList);
+        }
+    });
+
+    // Handle reply submission
+    replyForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = replyForm.querySelector('input');
+        const replyText = input.value.trim();
+        if (!replyText) return;
+
+        fetch(`/comments/${comment.id}/replies`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: replyText }),
+        })
+            .then(response => response.json())
+            .then(reply => {
+                input.value = '';
+                fetchReplies(comment.id, repliesList); // Refresh replies after adding
             })
-            .then(comments => {
-                if (comments.length === 0) {
-                    commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
-                } else {
-                    comments.forEach(comment => {
-                        const commentItem = document.createElement('div');
-                        commentItem.classList.add('comment-item');
-                        commentItem.innerHTML = `
-                            <div class="comment-item-header">
-                                <span class="comment-user">${comment.user.name}</span>
-                                <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
-                            </div>
-                            <div class="comment-text">${comment.text}</div>
-                        `;
-                        commentList.appendChild(commentItem);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching comments:', error);
-                commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
-            });
-    }
+            .catch(error => console.error('Error adding reply:', error));
+    });
+
+    return commentItem;
+}
+
+// Fetch replies for a specific comment
+function fetchReplies(commentId, repliesList) {
+    fetch(`/comments/${commentId}/replies`)
+        .then(response => response.json())
+        .then(replies => {
+            repliesList.innerHTML = ''; // Clear existing replies
+            if (replies.length === 0) {
+                repliesList.innerHTML = '<p>No replies yet.</p>';
+            } else {
+                replies.forEach(reply => {
+                    const replyElement = document.createElement('div');
+                    replyElement.classList.add('comment-item');
+                    replyElement.innerHTML = `
+                        <div class="comment-item-header">
+                            <span class="comment-user">${reply.user.name}</span>
+                            <span class="comment-time">${new Date(reply.created_at).toLocaleString()}</span>
+                        </div>
+                        <div class="comment-text">${reply.text}</div>
+                    `;
+                    repliesList.appendChild(replyElement);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching replies:', error);
+            repliesList.innerHTML = '<p>Failed to load replies. Please try again later.</p>';
+        });
+}
 
         // Function to Add a Comment
         function addComment(e) {
