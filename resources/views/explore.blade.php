@@ -465,12 +465,6 @@
     .comment-form button:hover {
         background: #555;
     }
-    .reply-btn.disabled {
-    pointer-events: none;
-    color: #888;
-    cursor: not-allowed;
-}
-
 </style>
 
 <div class="content-wrapper">
@@ -781,56 +775,41 @@
 
         // Function to Show Comments in Modal
         // Show comments in modal
-        function showComments(postId) {
-            
-    currentPostId = postId;
-    commentList.innerHTML = ''; // Clear previous comments
+    function showComments(postId) {
+        currentPostId = postId;
+        commentList.innerHTML = ''; // Clear previous comments
+        commentModal.classList.add('show');
 
-    fetch(`/posts/${postId}/comments`)
-        .then(response => response.json())
-        .then(comments => {
-            comments.forEach(comment => {
-                const commentItem = document.createElement('div');
-                commentItem.classList.add('comment-item');
-                commentItem.setAttribute('data-comment-id', comment.id);
-
-                // Render parent comment
-                commentItem.innerHTML = `
-                    <div class="comment-item-header">
-                        <span class="comment-user">${comment.user.name}</span>
-                        <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
-                    </div>
-                    <div class="comment-text">${comment.text}</div>
-                    <button class="reply-btn" data-comment-id="${comment.id}">Reply</button>
-                    <div class="reply-list">
-                        ${comment.replies.map(reply => `
-                            <div class="reply-item">
-                                <div class="reply-item-header">
-                                    <span class="comment-user">${reply.user.name}</span>
-                                    <span class="comment-time">${new Date(reply.created_at).toLocaleString()}</span>
-                                </div>
-                                <div class="comment-text">${reply.text}</div>
+        fetch(`/posts/${postId}/comments`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                return response.json();
+            })
+            .then(comments => {
+                if (comments.length === 0) {
+                    commentList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+                } else {
+                    comments.forEach(comment => {
+                        const commentItem = document.createElement('div');
+                        commentItem.classList.add('comment-item');
+                        commentItem.innerHTML = `
+                            <div class="comment-item-header">
+                                <span class="comment-user">${comment.user.name}</span>
+                                <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
-
-                commentList.appendChild(commentItem);
+                            <div class="comment-text">${comment.text}</div>
+                        `;
+                        commentList.appendChild(commentItem);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching comments:', error);
+                commentList.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
             });
-
-            // Attach reply functionality to reply buttons
-            document.querySelectorAll('.reply-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const parentId = e.target.dataset.commentId;
-                    showReplyForm(parentId, e.target);
-                });
-            });
-        })
-        .catch(error => console.error('Error fetching comments:', error));
-}
-
-
-
+    }
 
         // Function to Add a Comment
         function addComment(e) {
@@ -862,72 +841,6 @@
                 })
                 .catch(error => console.error('Error adding comment:', error));
         }
-
-        function showReplyForm(parentId, button) {
-    const replyForm = document.createElement('form');
-    replyForm.classList.add('comment-form');
-    replyForm.innerHTML = `
-        <input type="text" placeholder="Write a reply..." required />
-        <button type="submit">Reply</button>
-    `;
-    button.after(replyForm);
-
-    replyForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const input = replyForm.querySelector('input');
-        const replyText = input.value.trim();
-        if (!replyText) return;
-
-        console.log('Submitting reply:', { parentId, replyText }); // Debug log
-
-        fetch(`/posts/${currentPostId}/comments/${parentId}/reply`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: replyText }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        alert(data.message || 'Failed to post reply');
-                    });
-                }
-                return response.json();
-            })
-            .then((newReply) => {
-                console.log('Reply saved:', newReply); // Debug log
-                replyForm.remove();
-                appendReplyToComment(parentId, newReply);
-            })
-            .catch(error => console.error('Error saving reply:', error));
-    });
-}
-
-
-
-function appendReplyToComment(parentId, newReply) {
-    const parentComment = document.querySelector(`.comment-item[data-comment-id='${parentId}']`);
-    const replyList = parentComment.querySelector('.reply-list');
-
-    // Create a new reply element
-    const replyItem = document.createElement('div');
-    replyItem.classList.add('reply-item');
-    replyItem.innerHTML = `
-        <div class="reply-item-header">
-            <span class="comment-user">${newReply.user.name}</span>
-            <span class="comment-time">${new Date(newReply.created_at).toLocaleString()}</span>
-        </div>
-        <div class="comment-text">${newReply.text}</div>
-    `;
-
-    replyList.appendChild(replyItem); // Append the new reply to the reply list
-}
-
-
-
-
 
         // Initial Loading of Topics and Profiles
         loadMoreTopics();
