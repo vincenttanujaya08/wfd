@@ -31,6 +31,9 @@ Route::get('/explore', function () {
     return view('explore');
 })->name('explore');
 
+Route::get('/notification', function () {
+    return view('notification');
+})->name('notification');
 
 // Routes that require authentication
 Route::middleware(['auth'])->group(function () {
@@ -74,6 +77,23 @@ Route::middleware('guest')->group(function() {
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::get('/posts', [PostController::class, 'fetchPosts'])->name('posts.fetch');
+Route::get('/posts/{id}/details', [PostController::class, 'getDetails']);
+
+
+
+// Hidden comment homee
+Route::patch('/comments/{id}/hide', [PostController::class, 'hideComment'])->name('comments.hide');
+Route::get('/posts/{id}/hidden-comments', [PostController::class, 'getHiddenComments'])->name('posts.hidden-comments');
+Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])->name('comments.unhide');
+
+
+//Notification
+Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCount'])->name('notifications.unread-count');
+
+
+//Update status public private
+Route::patch('/posts/{post}/toggle-status', [PostController::class, 'toggleStatus'])->name('posts.toggleStatus');
+
 
 // Database test route (for checking DB connection)
 Route::get('/db-test', function () {
