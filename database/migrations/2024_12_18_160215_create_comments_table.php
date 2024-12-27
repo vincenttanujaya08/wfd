@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -17,39 +16,14 @@ return new class extends Migration
             $table->boolean('seen')->default(false); // Default false
             $table->boolean('hide')->default(false); // Default false
             $table->timestamps();
-            $table->unsignedBigInteger('parent_id')->nullable()->after('user_id');
-            $table->foreign('parent_id')->references('id')->on('comments')->onDelete('cascade');
-        });
-
-        // Add logic to update the 'seen' column based on ownership
-        Schema::table('comments', function (Blueprint $table) {
-            DB::statement('
-                CREATE TRIGGER set_seen_default BEFORE INSERT ON comments
-                FOR EACH ROW
-                BEGIN
-                    SET NEW.seen = (SELECT posts.user_id = NEW.user_id FROM posts WHERE posts.id = NEW.post_id);
-                END
-            ');
-        });
-
-        // Add logic to update the 'seen' column based on ownership
-        Schema::table('comments', function (Blueprint $table) {
-            DB::statement('
-                CREATE TRIGGER set_seen_default BEFORE INSERT ON comments
-                FOR EACH ROW
-                BEGIN
-                    SET NEW.seen = (SELECT posts.user_id = NEW.user_id FROM posts WHERE posts.id = NEW.post_id);
-                END
-            ');
+            $table->unsignedBigInteger('parent_id')->nullable(); // Removed "AFTER user_id"
+            $table->foreign('parent_id')->references('id')->on('comments')->onDelete('cascade'); // Self-referencing foreign key
         });
     }
 
     public function down()
     {
-        Schema::table('comments', function (Blueprint $table) {
-            DB::statement('DROP TRIGGER IF EXISTS set_seen_default');
-        });
-
         Schema::dropIfExists('comments');
     }
 };
+
