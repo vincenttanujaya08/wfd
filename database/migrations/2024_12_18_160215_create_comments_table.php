@@ -17,6 +17,8 @@ return new class extends Migration
             $table->boolean('seen')->default(false); // Default false
             $table->boolean('hide')->default(false); // Default false
             $table->timestamps();
+            $table->unsignedBigInteger('parent_id')->nullable()->after('user_id');
+            $table->foreign('parent_id')->references('id')->on('comments')->onDelete('cascade');
         });
 
         // Add logic to update the 'seen' column based on ownership

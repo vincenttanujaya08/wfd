@@ -76,6 +76,10 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middl
 Route::get('/posts', [PostController::class, 'fetchPosts'])->name('posts.fetch');
 Route::get('/posts/{id}/details', [PostController::class, 'getDetails']);
 
+Route::post('/posts/{postId}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::post('/posts/{postId}/comments/{parentId}/reply', [CommentController::class, 'reply'])->name('comments.reply');
+
+
 // Database test route (for checking DB connection)
 Route::get('/db-test', function () {
     try {

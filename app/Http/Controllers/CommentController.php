@@ -11,14 +11,16 @@ class CommentController extends Controller
      * Fetch all comments for a specific post.
      */
     public function fetchComments($postId)
-    {
-        $comments = Comment::where('post_id', $postId)
-            ->with('user') // Include user details
-            ->latest() // Order by newest comments first
-            ->get();
+{
+    $comments = Comment::where('post_id', $postId)
+        ->whereNull('parent_id') // Only fetch top-level comments
+        ->with(['user', 'replies.user']) // Include replies and their authors
+        ->latest()
+        ->get();
 
-        return response()->json($comments);
-    }
+    return response()->json($comments);
+}
+
 
     /**
      * Add a new comment to a specific post.
@@ -40,4 +42,24 @@ class CommentController extends Controller
         // Return the newly created comment with the user's details
         return response()->json($comment->load('user'));
     }
+
+    public function reply(Request $request, $postId, $parentId)
+    {
+        // Debug: Log the received parentId
+        \Log::info('Replying to parentId: ' . $parentId);
+    
+        $request->validate([
+            'text' => 'required|string|max:1000',
+        ]);
+    
+        $reply = Comment::create([
+            'post_id' => $postId,
+            'user_id' => auth()->id(),
+            'text' => $request->text,
+            'parent_id' => $parentId,
+        ]);
+    
+        return response()->json($reply->load('user'));
+    }
+    
 }

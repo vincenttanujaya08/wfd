@@ -9,7 +9,8 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['post_id', 'user_id', 'text'];
+    protected $fillable = ['post_id', 'user_id', 'text', 'parent_id'];
+
 
     public function post()
     {
@@ -20,4 +21,10 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id')->with('user'); // Include user for each reply
+    }
+    
+
 }
