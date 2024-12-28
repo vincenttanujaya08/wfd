@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Comment;
 use App\Models\Like;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PostController extends Controller
 {
@@ -121,6 +123,12 @@ class PostController extends Controller
 
         return response()->json(['message' => 'Comment added successfully.']);
     }
+
+    public function visibleComments()
+    {
+        return $this->hasMany(Comment::class)->where('hide', 0);
+    }
+
 
     public function editCaption(Request $request, Post $post)
     {

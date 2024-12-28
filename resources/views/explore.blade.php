@@ -362,8 +362,10 @@
         padding: 1rem;
         display: flex;
         flex-direction: column;
-        max-height: 80vh; /* Limit the maximum height */
-        overflow: hidden; /* Ensure no overflow affects the modal layout */
+        max-height: 80vh;
+        /* Limit the maximum height */
+        overflow: hidden;
+        /* Ensure no overflow affects the modal layout */
     }
 
     .modal-header {
@@ -386,23 +388,32 @@
     }
 
     .comment-list {
-        flex: 1; /* Grow to fill available space */
+        flex: 1;
+        /* Grow to fill available space */
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        overflow-y: auto; /* Add vertical scrolling */
-        max-height: calc(2.5rem * 5); /* 2.5rem (approx height of one comment) * 5 = Height for 5 comments */
-        margin-bottom: 1rem; /* Space for the comment input */
-        scrollbar-width: thin; /* Modern browsers - thin scrollbar */
-        scrollbar-color: #555 #222; /* Modern browsers - custom scrollbar colors */
+        overflow-y: auto;
+        /* Add vertical scrolling */
+        max-height: calc(2.5rem * 5);
+        /* 2.5rem (approx height of one comment) * 5 = Height for 5 comments */
+        margin-bottom: 1rem;
+        /* Space for the comment input */
+        scrollbar-width: thin;
+        /* Modern browsers - thin scrollbar */
+        scrollbar-color: #555 #222;
+        /* Modern browsers - custom scrollbar colors */
     }
+
     /* Optional: Customize scrollbar for webkit browsers (Chrome, Edge, Safari) */
     .comment-list::-webkit-scrollbar {
         width: 8px;
     }
+
     .comment-list::-webkit-scrollbar-track {
         background: #222;
     }
+
     .comment-list::-webkit-scrollbar-thumb {
         background-color: #555;
         border-radius: 4px;
@@ -715,11 +726,16 @@
 
         // Function to Update Actions HTML
         function updateActionsHTML(actions, post) {
+            // Hitung komentar yang tidak di-hide
+            const visibleCommentsCount = post.comments.filter(comment => comment.hide === 0).length;
+
             actions.innerHTML = `
-            <span class="comment-btn"><i class="lni lni-comments"></i> ${post.comments.length}</span>
-            <span class="like-btn ${post.liked ? 'liked' : ''}"><i class="lni lni-heart"></i> ${post.likes_count}</span>
-        `;
+        <span class="comment-btn"><i class="lni lni-comments"></i> ${visibleCommentsCount}</span>
+        <span class="like-btn ${post.liked ? 'liked' : ''}"><i class="lni lni-heart"></i> ${post.likes_count}</span>
+    `;
         }
+
+
 
         // Function to Slide Images in the Slider
         function slideImages(slider, direction) {
@@ -1045,8 +1061,6 @@ function fetchReplies(commentId, repliesList) {
                 }
             });
         }
-
-
     });
 </script>
 
