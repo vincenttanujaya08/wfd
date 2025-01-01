@@ -265,6 +265,7 @@
             <a href="{{ route('notification') }}" class="nav-item {{ Request::is('notifications') ? 'active' : '' }}" aria-label="Notifications">
     <i class="lni lni-alarm" aria-hidden="true"></i>
     <span class="nav-text">NOTIFICATIONS</span>
+    <span class="notification-badge" style="display: none;" aria-label="Unread notifications count">0</span>
     
 </a>
 <a href="{{ route('profile.show') }}" class="nav-item {{ Request::is('profile') ? 'active' : '' }}" aria-label="Profile">

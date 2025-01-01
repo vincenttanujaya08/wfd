@@ -104,7 +104,7 @@ Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])-
 
 
 //Notification
-Route::get('/notifications/unread-count', [PostController::class, 'getUnreadCount'])->name('notifications.unread-count');
+Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 Route::get('/notification', [NotificationController::class, 'getNotifications'])->name('notification');
 Route::post('/clear-notifications', [NotificationController::class, 'clearNotifications'])->name('clear.notifications');
 

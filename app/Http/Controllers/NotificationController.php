@@ -135,47 +135,67 @@ class NotificationController extends Controller
      */
     public function getUnreadCount()
     {
-        // Mendapatkan ID pengguna yang sedang login
+        // Hardcode user_id = 1 for testing
         $userId = Auth::id();
-
-        // Definisikan SQL query dengan parameter binding untuk mencegah SQL injection
-        $sql = "
-            SELECT 
-                (
-                    SELECT COUNT(*) 
-                    FROM likes
-                    JOIN posts ON likes.post_id = posts.id
-                    WHERE posts.user_id = :user_id AND likes.seen = 0
-                ) +
-                (
-                    SELECT COUNT(*) 
-                    FROM comments
-                    JOIN posts ON comments.post_id = posts.id
-                    WHERE posts.user_id = :user_id AND comments.seen = 0
-                ) +
-                (
-                    SELECT COUNT(*) 
-                    FROM comment_likes
-                    JOIN comments ON comment_likes.comment_id = comments.id
-                    WHERE comments.user_id = :user_id AND comment_likes.seen = 0
-                ) +
-                (
-                    SELECT COUNT(*) 
-                    FROM replies
-                    JOIN comments ON replies.comment_id = comments.id
-                    WHERE comments.user_id = :user_id AND replies.seen = 0
-                ) AS total_unread_notifications;
+        if (!$userId) {
+            return response()->json([
+                'error' => 'User is not authenticated.',
+            ], 401);
+        }
+    
+        // Define the aggregated query using UNION ALL
+        $aggregatedQuery = "
+            SELECT COUNT(*) AS total_unread_notifications FROM (
+                SELECT likes.id
+                FROM likes
+                JOIN posts ON likes.post_id = posts.id
+                WHERE posts.user_id = $userId AND likes.seen = 0
+    
+                UNION ALL
+    
+                SELECT comments.id
+                FROM comments
+                JOIN posts ON comments.post_id = posts.id
+                WHERE posts.user_id = $userId  AND comments.seen = 0
+    
+                UNION ALL
+    
+                SELECT comment_likes.id
+                FROM comment_likes
+                JOIN comments ON comment_likes.comment_id = comments.id
+                WHERE comments.user_id = $userId  AND comment_likes.seen = 0
+    
+                UNION ALL
+    
+                SELECT replies.id
+                FROM replies
+                JOIN comments ON replies.comment_id = comments.id
+                WHERE comments.user_id = $userId  AND replies.seen = 0
+            ) AS unread_notifications;
         ";
-
-        // Jalankan query dengan parameter binding
-        $result = DB::select($sql, ['user_id' => $userId]);
-
-        // `DB::select` mengembalikan array objek stdClass. Ambil objek pertama.
-        $totalUnreadCount = $result[0]->total_unread_notifications;
-        return response()->json([
-            'unread_notifications_count' => $totalUnreadCount,
-        ]);
-    }
+    
+        try {
+            // Execute the aggregated query
+            $result = DB::select($aggregatedQuery);
+    
+            // Get the total unread notifications count
+            $totalUnreadCount = $result[0]->total_unread_notifications ?? 0;
+    
+            // Return the count as JSON
+            return response()->json([
+                'unread_notifications_count' => $totalUnreadCount,
+            ]);
+    
+        } catch (\Exception $e) {
+            // Return an error response without using \Log
+            return response()->json([
+                'error' => 'An error occurred while fetching unread notifications.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+        
+    } 
+    
 
     /**
      * Fetch and display unread notifications.
