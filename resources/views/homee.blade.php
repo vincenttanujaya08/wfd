@@ -427,6 +427,7 @@
 
 </style>
 
+
 <div class="content-wrapper">
     <div class="main-content">
         <h2>Your Posts</h2>

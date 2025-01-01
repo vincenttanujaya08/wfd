@@ -64,7 +64,18 @@ Route::middleware(['auth'])->group(function () {
     // Delete Post via AJAX
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/posts/{postId}/comments', [CommentController::class, 'fetchComments'])->name('comments.fetch');
+    
 });
+//Profile
+use App\Http\Controllers\ProfileController;
+
+Route::get('/profile', [ProfileController::class, 'show'])
+    ->middleware('auth') // Ensure only authenticated users can access
+    ->name('profile.show');
+
+    Route::post('/profile/update', [ProfileController::class, 'update'])
+    ->middleware('auth')
+    ->name('profile.update');    
 
 // Login & Logout Routes
 Route::middleware('guest')->group(function () {
