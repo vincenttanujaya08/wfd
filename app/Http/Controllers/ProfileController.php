@@ -13,8 +13,19 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        $user = Auth::user(); // Get the authenticated user
-        return view('profile', compact('user'));
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Total posts by the user (assuming a Post model with user_id column)
+        $totalPosts = DB::table('posts')->where('user_id', $user->id)->count();
+
+        // Total followers
+        $totalFollowers = DB::table('user_followers')->where('user_id', $user->id)->count();
+
+        // Total following
+        $totalFollowing = DB::table('user_followers')->where('follower_id', $user->id)->count();
+
+        return view('profile', compact('user', 'totalPosts', 'totalFollowers', 'totalFollowing'));
     }
 
     /**

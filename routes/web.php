@@ -64,6 +64,8 @@ Route::middleware(['auth'])->group(function () {
     // Delete Post via AJAX
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('/posts/{postId}/comments', [CommentController::class, 'fetchComments'])->name('comments.fetch');
+   
+
     
 });
 //Profile
@@ -116,6 +118,12 @@ Route::get('/comments/{commentId}/replies', [ReplyController::class, 'fetchRepli
 Route::middleware(['auth'])->group(function () {
     Route::post('/comments/{commentId}/like', [CommentController::class, 'likeComment'])->name('comments.like');
 });
+
+
+//Follow 
+use App\Http\Controllers\FollowController;
+Route::post('/follow/{user}', [FollowController::class, 'follow'])->middleware('auth')->name('follow');
+Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->middleware('auth')->name('unfollow');
 
 
 // Database test route (for checking DB connection)

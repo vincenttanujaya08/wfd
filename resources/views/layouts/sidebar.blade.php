@@ -267,6 +267,10 @@
     <span class="nav-text">NOTIFICATIONS</span>
     
 </a>
+<a href="{{ route('profile.show') }}" class="nav-item {{ Request::is('profile') ? 'active' : '' }}" aria-label="Profile">
+            <i class="lni lni-user" aria-hidden="true"></i>
+            <span class="nav-text">PROFILE</span>
+        </a>
 
 
         </div>
