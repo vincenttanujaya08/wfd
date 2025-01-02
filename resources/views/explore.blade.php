@@ -92,6 +92,14 @@
         align-items: center;
         padding: 0.5rem;
     }
+    .post-header .profile-pic {
+        width: 40px; /* Adjust size as needed */
+        height: 40px; /* Match width for a perfect circle */
+        border-radius: 50%; /* This creates the circular frame */
+        margin-right: 0.5rem; /* Space between the image and username */
+        object-fit: cover; /* Ensures the image fits well */
+        border: 2px solid #333; /* Optional border for aesthetics */
+    }
 
     /* Avatar dihilangkan, hanya username dan waktu */
     .post-header .username {
@@ -725,10 +733,10 @@
             const header = document.createElement('div');
             header.classList.add('post-header');
             header.innerHTML = `
-            <div class="username">${post.user.name}</div>
-            <div class="time">${timeAgo(new Date(post.created_at))}</div>
-            
-        `;
+                <img src="${post.user.profile_image}" alt="User Profile Picture" class="profile-pic">
+                <div class="username">${post.user.name}</div>
+                <div class="time">${timeAgo(new Date(post.created_at))}</div>
+            `;
             card.appendChild(header);
 
             // Image Slider
