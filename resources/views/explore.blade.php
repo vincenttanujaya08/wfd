@@ -11,8 +11,9 @@
         background: #111;
         font-family: sans-serif;
         color: #ccc;
+       
     }
-
+   
     .content-wrapper {
         display: flex;
         width: 100%;
@@ -535,6 +536,14 @@
     text-decoration: underline;
 }
 
+.content-wrapper{
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+.content-wrapper.loaded {
+      opacity: 1;
+    }
+
 </style>
 
 <div class="content-wrapper">
@@ -612,7 +621,11 @@
     </div>
 </div>
 
-
+<script>
+     window.addEventListener('load', function() {
+      document.querySelector('.content-wrapper').classList.add('loaded');
+    });
+</script>
 <script>
     // Ensure that the DOM is fully loaded before executing scripts
     document.addEventListener('DOMContentLoaded', () => {
@@ -714,7 +727,7 @@
             header.innerHTML = `
             <div class="username">${post.user.name}</div>
             <div class="time">${timeAgo(new Date(post.created_at))}</div>
-            <div class="menu-btn">⋮</div>
+            
         `;
             card.appendChild(header);
 
@@ -1150,6 +1163,8 @@ function fetchReplies(commentId, repliesList) {
             });
         }
     });
+
+   
 </script>
 
 @endsection

@@ -184,6 +184,16 @@
     background-color: #ccc;
     color: #000;
   }
+
+  .profile-container {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+  }
+
+  .profile-container.loaded{
+    opacity: 1;
+  }
+  
 </style>
 
 <div class="profile-container">
@@ -290,6 +300,11 @@
     </form>
   </div>
 </div>
+<script>
+     window.addEventListener('load', function() {
+      document.querySelector('.profile-container').classList.add('loaded');
+    });
+</script>
 
 <script 
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
