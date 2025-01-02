@@ -34,6 +34,9 @@ Route::get('/explore', function () {
     return view('explore');
 })->name('explore');
 
+Route::get('/load', function () {
+    return view('load');
+})->name('load');
 // Route::get('/notification', function () {
 //     return view('notification');
 // })->name('notification');
