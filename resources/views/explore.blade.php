@@ -100,6 +100,14 @@
         object-fit: cover; /* Ensures the image fits well */
         border: 2px solid #333; /* Optional border for aesthetics */
     }
+    .comment-item-header .comment-user .profile-pic{
+        width: 40px; /* Adjust size as needed */
+        height: 40px; /* Match width for a perfect circle */
+        border-radius: 50%; /* This creates the circular frame */
+        margin-right: 0.5rem; /* Space between the image and username */
+        object-fit: cover; /* Ensures the image fits well */
+        border: 2px solid #333; /* Optional border for aesthetics */
+    }
 
     /* Avatar dihilangkan, hanya username dan waktu */
     .post-header .username {
@@ -908,6 +916,7 @@ function createCommentWithReplies(comment) {
     commentItem.innerHTML = `
         <div class="comment-item-header">
             <span class="comment-user">
+                <img src="${comment.user.profile_image}" alt="User Profile Picture" class="profile-pic">
                 ${comment.user.name}
                 <span class="like-btn ${comment.liked ? 'liked' : ''}" data-comment-id="${comment.id}">
                     <i class="lni lni-heart"></i> ${comment.likes_count || 0}
@@ -1001,7 +1010,10 @@ function fetchReplies(commentId, repliesList) {
                     replyElement.classList.add('comment-item');
                     replyElement.innerHTML = `
                         <div class="comment-item-header">
-                            <span class="comment-user">${reply.user.name}</span>
+                            <span class="comment-user">
+                                <img src="${reply.user.profile_image}" alt="User Profile Picture" class="profile-pic">
+                                ${reply.user.name}
+                                </span>
                             <span class="comment-time">${new Date(reply.created_at).toLocaleString()}</span>
                         </div>
                         <div class="comment-text">${reply.text}</div>
