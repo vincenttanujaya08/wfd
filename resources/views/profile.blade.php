@@ -446,7 +446,8 @@
 
         <div class="user-item">
           <div class="user-profile">
-            <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic">
+            <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic"
+            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
             <p class="username mb-0">{{ $other->name }}</p>
           </div>
 
@@ -615,7 +616,8 @@
           const line = document.createElement('div');
           line.classList.add('user-line');
           line.innerHTML = `
-            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic">
+            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic"
+            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
             <span>${u.name}</span>
           `;
           followersListEl.appendChild(line);
@@ -647,7 +649,8 @@
           const line = document.createElement('div');
           line.classList.add('user-line');
           line.innerHTML = `
-            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic">
+            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic"
+            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
             <span>${u.name}</span>
           `;
           followingListEl.appendChild(line);
