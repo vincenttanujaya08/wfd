@@ -25,7 +25,6 @@
         box-sizing: border-box;
         background: #111;
         margin-left: 2rem !important;
-
     }
 
     #userPostsContainer {
@@ -439,6 +438,7 @@
 <div class="content-wrapper">
     <div class="main-content">
         <h2>Your Posts</h2>
+        <p style="color: gray;">For post details, you can click onto the image!</p>
         <div id="userPostsContainer">
             @forelse($posts as $post)
                 <div class="post-card" data-post-id="{{ $post->id }}">
