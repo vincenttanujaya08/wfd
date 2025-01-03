@@ -10,6 +10,9 @@
   crossorigin="anonymous"
 />
 
+<!-- CSRF meta for AJAX -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <style>
   html, body {
     margin: 0;
@@ -18,8 +21,6 @@
     height: 100vh;
     color: #fff;
     display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .profile-container {
@@ -37,6 +38,19 @@
     border: 4px solid transparent;
     animation: whiteGlow 2s infinite alternate;
     overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+    
+  }
+
+  .mainn{
+    opacity: 0; /* For fade-in effect */
+    transition: opacity 1s ease-in; 
+  }
+  .mainn.loaded {
+    opacity: 1;
   }
 
   @keyframes whiteGlow {
@@ -58,6 +72,10 @@
     flex-shrink: 0;
     border: 3px solid #fff;
     box-shadow: 0 8px 15px rgba(255, 255, 255, 0.5);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .profile-image img {
@@ -148,6 +166,7 @@
   .form-control:focus {
     background-color: #444;
     border-color: #888;
+    color: white;
   }
 
   .modal-header {
@@ -185,18 +204,86 @@
     color: #000;
   }
 
-  .profile-container {
-    opacity: 0;
-    transition: opacity 1s ease-in;
+  /* Follow Container */
+  .follow-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 20px;
+    background: rgba(0,0,0,0.75);
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    color: #fff;
+  }
+  .follow-container h2 {
+    margin-bottom: 1rem;
+  }
+  .search-bar {
+    margin-bottom: 1rem;
+  }
+  .search-bar input {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+  }
+  .search-bar input:focus {
+    background-color: #444;
+    border-color: #888;
+  }
+  .user-list {
+    margin-top: 1rem;
+    max-height: 360px; 
+    overflow-y: auto;
+  }
+  .user-item {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    transition: transform 0.3s ease;
+  }
+  .user-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+  }
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-profile img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .user-profile .username {
+    font-size: 1rem;
+    color: #fff;
+    margin: 0;
+  }
+  .follow-btn {
+    min-width: 80px;
   }
 
-  .profile-container.loaded{
-    opacity: 1;
+  .btn-follow {
+    background-color: #0d6efd; /* Blue */
+    border: none;
+    color: white;
   }
-  
+  .btn-followed {
+    background-color: #dc3545; /* Red */
+    border: none;
+    color: white;
+  }
 </style>
 
+<div class="mainn">
+<!-- Profile Container -->
 <div class="profile-container">
+  <!-- Profile Image -->
   <div class="profile-image">
     <img 
       src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}" 
@@ -204,6 +291,7 @@
     />
   </div>
 
+  <!-- User Info -->
   <div class="user-info">
     <div class="d-flex justify-content-between align-items-center">
       <div class="username">
@@ -217,9 +305,11 @@
         Edit Profile
       </button>
     </div>
+
     <div class="description">
       {{ $user->description ?? 'A little description...' }}
     </div>
+
     <div class="stats-container">
       <div class="stat-item" data-target="posts">
         <strong>{{ $totalPosts }}</strong>
@@ -230,13 +320,72 @@
         <span>Follower{{ $totalFollowers === 1 ? '' : 's' }}</span>
       </div>
       <div class="stat-item">
-        <strong>{{ $totalFollowing }}</strong>
-        <span>Following</span>
+        <strong id="folNum">{{ $totalFollowing }}</strong>
+        <span >Following</span>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Container Follow: "Find People to Follow" on same page -->
+<div class="follow-container">
+  <h2>Find People to Follow</h2>
+
+  <!-- Search Bar (Optional AJAX Later) -->
+  <div class="search-bar">
+  <label for="searchUser" class="form-label">Search Users</label>
+  <input 
+    type="text" 
+    class="form-control" 
+    id="searchUser" 
+    placeholder="Type to search..."
+    autocomplete="off"
+  >
+</div>
+
+<!-- Filter: All, Followed, Unfollowed -->
+<div class="d-flex mb-2" style="gap: 1rem;">
+  <label for="searchFilter" class="form-label my-auto">Filter:</label>
+  <select id="searchFilter" class="form-select form-select-sm" style="max-width:150px;">
+    <option value="all">All</option>
+    <option value="followed">Followed</option>
+    <option value="unfollowed">Unfollowed</option>
+  </select>
+</div>
+
+<!-- The user-list container (same as before, but we'll re-render it) -->
+<div class="user-list" id="userList">
+  @foreach($otherUsers as $other)
+    @php
+      $isFollowed = DB::table('user_followers')
+          ->where('user_id', $other->id)
+          ->where('follower_id', auth()->id())
+          ->exists();
+    @endphp
+
+    <div class="user-item">
+      <div class="user-profile">
+        <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic">
+        <p class="username mb-0">{{ $other->name }}</p>
+      </div>
+
+      <button 
+        class="btn btn-sm follow-btn 
+          {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
+        data-user-id="{{ $other->id }}"
+        data-followed="{{ $isFollowed ? 'true' : 'false' }}"
+      >
+        {{ $isFollowed ? 'Followed' : 'Follow' }}
+      </button>
+    </div>
+  @endforeach
+</div>
+</div>
+</div>
+
+
+
+<!-- Modal Edit Profile -->
 <div 
   class="modal fade" 
   id="editProfileModal" 
@@ -300,23 +449,279 @@
     </form>
   </div>
 </div>
-<script>
-     window.addEventListener('load', function() {
-      document.querySelector('.profile-container').classList.add('loaded');
-    });
-</script>
 
+<!-- Bootstrap + JS -->
 <script 
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
   integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
   crossorigin="anonymous">
 </script>
+
 <script>
+  // Fade in the profile container
+  window.addEventListener('load', function() {
+    document.querySelector('.mainn').classList.add('loaded');
+  });
+
+  // If someone clicks on the Posts stat:
   document.querySelectorAll('.stat-item[data-target="posts"]').forEach(item => {
     item.addEventListener('click', () => {
       window.location.href = "{{ route('homee') }}";
     });
   });
-</script>
-@endsection
 
+  // AJAX Follow/Unfollow
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const followButtons = document.querySelectorAll('.follow-btn');
+
+  followButtons.forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const userId = this.dataset.userId;
+      const followed = this.dataset.followed === 'true'; 
+      // If followed == true -> UNFOLLOW
+      // If false -> FOLLOW
+
+      let url, method;
+      if (followed) {
+        // Unfollow
+        url = `/unfollow/${userId}`;
+        method = 'DELETE';
+      } else {
+        // Follow
+        url = `/follow/${userId}`;
+        method = 'POST';
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Error in follow/unfollow:', response.status);
+          // Optionally show an error alert
+          return;
+        }
+
+        const data = await response.json(); 
+        // data.followed should be boolean from controller
+
+        var followedNum = document.getElementById('folNum');
+        // Toggle button
+       if (data.followed) {
+  // Means now followed
+  this.textContent = 'Followed';
+  this.classList.remove('btn-follow');
+  this.classList.add('btn-followed');
+  this.dataset.followed = 'true';
+
+  // Convert followedNum.innerHTML to an integer:
+  let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+  followedNum.innerHTML = currentVal + 1; // numeric addition
+} else {
+  // Means now unfollowed
+  this.textContent = 'Follow';
+  this.classList.remove('btn-followed');
+  this.classList.add('btn-follow');
+  this.dataset.followed = 'false';
+
+  // Convert followedNum.innerHTML to an integer:
+  let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+  if (currentVal > 0) {
+    followedNum.innerHTML = currentVal - 1;
+  }
+}
+
+      } catch (error) {
+        console.error('AJAX error:', error);
+      }
+    });
+  });
+  const searchInput = document.getElementById('searchUser');
+  const filterSelect = document.getElementById('searchFilter');
+  const userListEl = document.getElementById('userList');
+
+  // Debounce timer to avoid hitting server on every single keystroke too fast
+  let searchTimer = null;
+
+  function doSearch() {
+    const query = searchInput.value.trim();     // the typed text
+    const filter = filterSelect.value;          // all | followed | unfollowed
+
+    // Construct URL: /search-users?q=...&filter=...
+    let url = `/search-users?q=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Search error: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // data => array of user objects, each with { id, name, profile_image, is_followed }
+      renderUserList(data);
+    })
+    .catch(err => {
+      console.error('Search fetch error:', err);
+    });
+  }
+
+  // 2) On keyup in the searchInput, we do a small debounce
+  searchInput.addEventListener('keyup', () => {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(doSearch, 300); // 300ms delay
+  });
+
+  // 3) On change in filterSelect
+  filterSelect.addEventListener('change', () => {
+    doSearch();
+  });
+
+  // 4) Re-render function for .user-list
+  function renderUserList(users) {
+    // 'users' is the JSON array from your endpoint
+    // We'll rebuild the .user-list content
+    userListEl.innerHTML = '';
+
+    users.forEach(user => {
+      // user.is_followed => boolean from your server
+      // user.name, user.profile_image, user.id, etc.
+
+      const isFollowed = user.is_followed ? 'true' : 'false';
+      const btnClass = user.is_followed ? 'btn-followed' : 'btn-follow';
+      const btnText = user.is_followed ? 'Followed' : 'Follow';
+
+      // Build the HTML
+      const userItem = document.createElement('div');
+      userItem.classList.add('user-item');
+
+      const userProfile = document.createElement('div');
+      userProfile.classList.add('user-profile');
+
+      // Image + Username
+      const img = document.createElement('img');
+      img.src = user.profile_image ?? 'https://via.placeholder.com/40';
+      img.alt = 'User Pic';
+      img.style.width = '40px';
+      img.style.height = '40px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '50%';
+
+      const usernameP = document.createElement('p');
+      usernameP.classList.add('username', 'mb-0');
+      usernameP.textContent = user.name;
+
+      userProfile.appendChild(img);
+      userProfile.appendChild(usernameP);
+
+      // Follow/unfollow button
+      const followBtn = document.createElement('button');
+      followBtn.classList.add('btn', 'btn-sm', 'follow-btn', btnClass);
+      followBtn.setAttribute('data-user-id', user.id);
+      followBtn.setAttribute('data-followed', isFollowed);
+      followBtn.textContent = btnText;
+
+      // We want the same follow/unfollow logic on this new button
+      followBtn.addEventListener('click', followUnfollowHandler);
+
+      userItem.appendChild(userProfile);
+      userItem.appendChild(followBtn);
+
+      userListEl.appendChild(userItem);
+    });
+  }
+
+  // 5) Move your existing follow/unfollow logic into a function
+  async function followUnfollowHandler(e) {
+  e.preventDefault();
+  const userId = this.dataset.userId;
+  const followed = (this.dataset.followed === 'true');
+
+  let url, method;
+  if (followed) {
+    // Unfollow
+    url = `/unfollow/${userId}`;
+    method = 'DELETE';
+  } else {
+    // Follow
+    url = `/follow/${userId}`;
+    method = 'POST';
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Error in follow/unfollow:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+    // data.followed => true if now followed, false if now unfollowed
+
+    // Toggle button text & style
+    if (data.followed) {
+      this.textContent = 'Followed';
+      this.classList.remove('btn-follow');
+      this.classList.add('btn-followed');
+      this.dataset.followed = 'true';
+      
+      // Increment your 'Following' count
+      const followedNum = document.getElementById('folNum');
+      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+      followedNum.innerHTML = currentVal + 1;
+
+    } else {
+      this.textContent = 'Follow';
+      this.classList.remove('btn-followed');
+      this.classList.add('btn-follow');
+      this.dataset.followed = 'false';
+
+      // Decrement your 'Following' count
+      const followedNum = document.getElementById('folNum');
+      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+      if (currentVal > 0) {
+        followedNum.innerHTML = currentVal - 1;
+      }
+    }
+
+    // If you're on "followed" or "unfollowed" filter, re-run the search 
+    // so the user disappears or appears accordingly.
+    // If you want that behavior, just do:
+    doSearch();
+
+  } catch (error) {
+    console.error('AJAX error:', error);
+  }
+}
+
+
+  // 6) Attach the existing followUnfollowHandler to the initial buttons
+  followButtons.forEach(btn => {
+    btn.addEventListener('click', followUnfollowHandler);
+  });
+
+  // 7) (Optional) On page load, we might do an initial search to show "all" if needed
+  // doSearch(); // or only do it if user starts typing or changes the filter
+</script>
+@endsection 

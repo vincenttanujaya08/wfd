@@ -143,7 +143,7 @@
                 <button type="submit" class="strong">SIGN IN</button>
             </form>
 
-
+            
         </nav>
         <div class="content">
             <form method="GET" action="{{ route('signup') }}">
