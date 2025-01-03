@@ -69,38 +69,35 @@ class NotificationController extends Controller
             ->get();
 
         // Fetch comment_likes on user's comments
-        $commentLikes = DB::table('comment_likes')
-            ->join('users', 'comment_likes.user_id', '=', 'users.id')
-            ->join('comments', 'comment_likes.comment_id', '=', 'comments.id')
-            ->join('posts', 'comments.post_id', '=', 'posts.id')
-            ->where('posts.user_id', $userId)
-            ->where('comment_likes.seen', 0)
-            ->where('comment_likes.created_at', '>=', $timeFrame)
-            ->select(
-                'comment_likes.id as comment_like_id',
-                'users.name as user_name',
-                'comments.id as comment_id',
-                'comment_likes.created_at'
-            )
-            ->get();
+$commentLikes = DB::table('comment_likes')
+->join('users', 'comment_likes.user_id', '=', 'users.id')
+->join('comments', 'comment_likes.comment_id', '=', 'comments.id')
+->where('comments.user_id', $userId) // Change this to the user owning the comment
+->where('comment_likes.seen', 0)
+->where('comment_likes.created_at', '>=', $timeFrame)
+->select(
+    'comment_likes.id as comment_like_id',
+    'users.name as user_name',
+    'comments.id as comment_id',
+    'comment_likes.created_at'
+)
+->get();
 
-        // Fetch replies to user's comments
-        $replies = DB::table('replies')
-            ->join('users', 'replies.user_id', '=', 'users.id')
-            ->join('comments', 'replies.comment_id', '=', 'comments.id')
-            ->join('posts', 'comments.post_id', '=', 'posts.id')
-            ->where('posts.user_id', $userId)
-            ->where('replies.seen', 0)
-            ->where('replies.created_at', '>=', $timeFrame)
-            ->select(
-                'replies.id as reply_id',
-                'users.name as user_name',
-                'replies.text as reply_text',
-                'comments.id as comment_id',
-                'replies.created_at'
-            )
-            ->get();
-
+// Fetch replies to user's comments
+$replies = DB::table('replies')
+->join('users', 'replies.user_id', '=', 'users.id')
+->join('comments', 'replies.comment_id', '=', 'comments.id')
+->where('comments.user_id', $userId) // Change this to the user owning the comment
+->where('replies.seen', 0)
+->where('replies.created_at', '>=', $timeFrame)
+->select(
+    'replies.id as reply_id',
+    'users.name as user_name',
+    'replies.text as reply_text',
+    'comments.id as comment_id',
+    'replies.created_at'
+)
+->get();
         // Merge all notifications into a single collection
         $notifications = $likes->map(function($item) {
             return (object)[
