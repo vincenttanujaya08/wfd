@@ -695,57 +695,51 @@
 
         if (!response.ok) {
           console.error('Error in follow/unfollow:', response.status);
+          // Optionally show an error alert
           return;
         }
 
         const data = await response.json(); 
-        // data.followed => true if now followed, false if now unfollowed
+        // data.followed should be boolean from controller
 
+        var followedNum = document.getElementById('folNum');
         // Toggle button
-        if (data.followed) {
-          this.textContent = 'Followed';
-          this.classList.remove('btn-follow');
-          this.classList.add('btn-followed');
-          this.dataset.followed = 'true';
+       if (data.followed) {
+  // Means now followed
+  this.textContent = 'Followed';
+  this.classList.remove('btn-follow');
+  this.classList.add('btn-followed');
+  this.dataset.followed = 'true';
 
-          // Optionally increment your 'Following' count
-          const followedNum = document.getElementById('folNum');
-          let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-          followedNum.innerHTML = currentVal + 1;
-        } else {
-          this.textContent = 'Follow';
-          this.classList.remove('btn-followed');
-          this.classList.add('btn-follow');
-          this.dataset.followed = 'false';
+  
+} else {
+  // Means now unfollowed
+  this.textContent = 'Follow';
+  this.classList.remove('btn-followed');
+  this.classList.add('btn-follow');
+  this.dataset.followed = 'false';
 
-          // Optionally decrement your 'Following' count
-          const followedNum = document.getElementById('folNum');
-          let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-          if (currentVal > 0) {
-            followedNum.innerHTML = currentVal - 1;
-          }
-        }
-
-        // re-run search if you want to update the list
-        doSearch();
+}
 
       } catch (error) {
         console.error('AJAX error:', error);
       }
     });
   });
-
-  // Searching/Filtering
   const searchInput = document.getElementById('searchUser');
   const filterSelect = document.getElementById('searchFilter');
   const userListEl = document.getElementById('userList');
+
+  // Debounce timer to avoid hitting server on every single keystroke too fast
   let searchTimer = null;
 
   function doSearch() {
-    const query = searchInput.value.trim();
-    const filter = filterSelect.value;
+    const query = searchInput.value.trim();     // the typed text
+    const filter = filterSelect.value;          // all | followed | unfollowed
 
+    // Construct URL: /search-users?q=...&filter=...
     let url = `/search-users?q=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}`;
+
     fetch(url, {
       method: 'GET',
       headers: {
@@ -760,6 +754,7 @@
       return response.json();
     })
     .then(data => {
+      // data => array of user objects, each with { id, name, profile_image, is_followed }
       renderUserList(data);
     })
     .catch(err => {
@@ -767,29 +762,41 @@
     });
   }
 
+  // 2) On keyup in the searchInput, we do a small debounce
   searchInput.addEventListener('keyup', () => {
     if (searchTimer) clearTimeout(searchTimer);
-    searchTimer = setTimeout(doSearch, 300);
+    searchTimer = setTimeout(doSearch, 300); // 300ms delay
   });
+
+  // 3) On change in filterSelect
   filterSelect.addEventListener('change', () => {
     doSearch();
   });
 
+  // 4) Re-render function for .user-list
   function renderUserList(users) {
+    // 'users' is the JSON array from your endpoint
+    // We'll rebuild the .user-list content
     userListEl.innerHTML = '';
-    users.forEach(u => {
-      const isFollowed = u.is_followed ? 'true' : 'false';
-      const btnClass = u.is_followed ? 'btn-followed' : 'btn-follow';
-      const btnText = u.is_followed ? 'Followed' : 'Follow';
 
+    users.forEach(user => {
+      // user.is_followed => boolean from your server
+      // user.name, user.profile_image, user.id, etc.
+
+      const isFollowed = user.is_followed ? 'true' : 'false';
+      const btnClass = user.is_followed ? 'btn-followed' : 'btn-follow';
+      const btnText = user.is_followed ? 'Followed' : 'Follow';
+
+      // Build the HTML
       const userItem = document.createElement('div');
       userItem.classList.add('user-item');
 
       const userProfile = document.createElement('div');
       userProfile.classList.add('user-profile');
 
+      // Image + Username
       const img = document.createElement('img');
-      img.src = u.profile_image ?? 'https://via.placeholder.com/40';
+      img.src = user.profile_image ?? 'https://via.placeholder.com/40';
       img.alt = 'User Pic';
       img.style.width = '40px';
       img.style.height = '40px';
@@ -798,17 +805,19 @@
 
       const usernameP = document.createElement('p');
       usernameP.classList.add('username', 'mb-0');
-      usernameP.textContent = u.name;
+      usernameP.textContent = user.name;
 
       userProfile.appendChild(img);
       userProfile.appendChild(usernameP);
 
+      // Follow/unfollow button
       const followBtn = document.createElement('button');
       followBtn.classList.add('btn', 'btn-sm', 'follow-btn', btnClass);
-      followBtn.setAttribute('data-user-id', u.id);
+      followBtn.setAttribute('data-user-id', user.id);
       followBtn.setAttribute('data-followed', isFollowed);
       followBtn.textContent = btnText;
 
+      // We want the same follow/unfollow logic on this new button
       followBtn.addEventListener('click', followUnfollowHandler);
 
       userItem.appendChild(userProfile);
@@ -817,5 +826,85 @@
       userListEl.appendChild(userItem);
     });
   }
+
+  // 5) Move your existing follow/unfollow logic into a function
+  async function followUnfollowHandler(e) {
+  e.preventDefault();
+  const userId = this.dataset.userId;
+  const followed = (this.dataset.followed === 'true');
+
+  let url, method;
+  if (followed) {
+    // Unfollow
+    url = `/unfollow/${userId}`;
+    method = 'DELETE';
+  } else {
+    // Follow
+    url = `/follow/${userId}`;
+    method = 'POST';
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Error in follow/unfollow:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+    // data.followed => true if now followed, false if now unfollowed
+
+    // Toggle button text & style
+    if (data.followed) {
+      this.textContent = 'Followed';
+      this.classList.remove('btn-follow');
+      this.classList.add('btn-followed');
+      this.dataset.followed = 'true';
+      
+      // Increment your 'Following' count
+      const followedNum = document.getElementById('folNum');
+      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+      followedNum.innerHTML = currentVal + 1;
+
+    } else {
+      this.textContent = 'Follow';
+      this.classList.remove('btn-followed');
+      this.classList.add('btn-follow');
+      this.dataset.followed = 'false';
+
+      // Decrement your 'Following' count
+      const followedNum = document.getElementById('folNum');
+      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+      if (currentVal > 0) {
+        followedNum.innerHTML = currentVal - 1;
+      }
+    }
+
+    // If you're on "followed" or "unfollowed" filter, re-run the search 
+    // so the user disappears or appears accordingly.
+    // If you want that behavior, just do:
+    doSearch();
+
+  } catch (error) {
+    console.error('AJAX error:', error);
+  }
+}
+
+
+  // 6) Attach the existing followUnfollowHandler to the initial buttons
+  followButtons.forEach(btn => {
+    btn.addEventListener('click', followUnfollowHandler);
+  });
+
+  // 7) (Optional) On page load, we might do an initial search to show "all" if needed
+  // doSearch(); // or only do it if user starts typing or changes the filter
 </script>
-@endsection
+@endsection 
