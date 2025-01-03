@@ -521,9 +521,7 @@
   this.classList.add('btn-followed');
   this.dataset.followed = 'true';
 
-  // Convert followedNum.innerHTML to an integer:
-  let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-  followedNum.innerHTML = currentVal + 1; // numeric addition
+  
 } else {
   // Means now unfollowed
   this.textContent = 'Follow';
@@ -531,11 +529,6 @@
   this.classList.add('btn-follow');
   this.dataset.followed = 'false';
 
-  // Convert followedNum.innerHTML to an integer:
-  let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-  if (currentVal > 0) {
-    followedNum.innerHTML = currentVal - 1;
-  }
 }
 
       } catch (error) {
