@@ -13,6 +13,8 @@ use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Notifications\Notification;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +35,8 @@ Route::get('/', function () {
 Route::get('/explore', function () {
     return view('explore');
 })->name('explore');
+
+
 
 Route::get('/load', function () {
     return view('load');
@@ -69,10 +73,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/posts/{postId}/comments', [CommentController::class, 'fetchComments'])->name('comments.fetch');
    
 
+    //follow unfoll
+    Route::post('/follow/{user}', [FollowController::class, 'follow'])->name('follow.ajax');
+
+    // Unfollow a user
+    Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->name('unfollow.ajax');
+
+    Route::get('/search-users', [ProfileController::class, 'searchUsers'])->name('users.search');
+
     
 });
 //Profile
-use App\Http\Controllers\ProfileController;
+
 
 Route::get('/profile', [ProfileController::class, 'show'])
     ->middleware('auth') // Ensure only authenticated users can access
@@ -123,8 +135,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-//Follow 
-use App\Http\Controllers\FollowController;
+
 Route::post('/follow/{user}', [FollowController::class, 'follow'])->middleware('auth')->name('follow');
 Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->middleware('auth')->name('unfollow');
 

@@ -18,8 +18,7 @@
             margin: 0;
             font-family: sans-serif;
             background: #111;
-            color: #ccc;
-            height: 2000px; /* Example for scroll */
+            color: #ccc; 
         }
 
         .main-content {

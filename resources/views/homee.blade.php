@@ -21,9 +21,11 @@
     }
 
     .main-content {
-        flex: 1;
+        
         box-sizing: border-box;
         background: #111;
+        margin-left: 2rem !important;
+
     }
 
     #userPostsContainer {
@@ -427,7 +429,7 @@
     .content-wrapper{
     opacity: 0;
     transition: opacity 1s ease-in;
-}
+    }
 .content-wrapper.loaded {
       opacity: 1;
     }
