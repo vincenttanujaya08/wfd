@@ -42,10 +42,9 @@
     align-items: center;
     margin-top: 5rem;
     margin-bottom: 5rem;
-    
   }
 
-  .mainn{
+  .mainn {
     opacity: 0; /* For fade-in effect */
     transition: opacity 1s ease-in; 
   }
@@ -128,7 +127,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer; /* So it looks clickable */
   }
 
   .stat-item:hover {
@@ -278,112 +278,208 @@
     border: none;
     color: white;
   }
+
+  /* Fade/Slide for Follower/Following Modals */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .follower-list-modal, .following-list-modal {
+    background: #222;
+    width: 80%;
+    max-width: 600px;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #333;
+    transform: translateY(-20px);
+    animation: slideDown 0.4s forwards;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-50px); }
+    to { transform: translateY(0); }
+  }
+  .close-modal-btn {
+    align-self: flex-end;
+    background: #666;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+  .close-modal-btn:hover {
+    background: #888;
+  }
+  .modal-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .modal-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.5rem;
+  }
+  .modal-list .user-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem;
+    margin-bottom: 0.3rem;
+    background: #333;
+    border-radius: 4px;
+  }
+  .modal-list .user-line:hover {
+    background: #444;
+  }
+  .modal-list .user-line img {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
 </style>
 
+<!-- Main Wrapper -->
 <div class="mainn">
-<!-- Profile Container -->
-<div class="profile-container">
-  <!-- Profile Image -->
-  <div class="profile-image">
-    <img 
-      src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}" 
-      alt="Profile Image"
-    />
+  <!-- Profile Container -->
+  <div class="profile-container">
+    <!-- Profile Image -->
+    <div class="profile-image">
+      <img 
+        src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}" 
+        alt="Profile Image"
+      />
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="username">
+          {{ $user->name ?? 'Username' }}
+        </div>
+        <button 
+          class="btn btn-outline-light btn-sm" 
+          data-bs-toggle="modal" 
+          data-bs-target="#editProfileModal"
+        >
+          Edit Profile
+        </button>
+      </div>
+
+      <div class="description">
+        {{ $user->description ?? 'A little description...' }}
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-item" data-target="posts">
+          <strong>{{ $totalPosts }}</strong>
+          <span>Post{{ $totalPosts === 1 ? '' : 's' }}</span>
+        </div>
+        <div class="stat-item" id="openFollowersModal">
+          <!-- We'll attach a click event in JS to open the "Followers" modal -->
+          <strong>{{ $totalFollowers }}</strong>
+          <span>Follower{{ $totalFollowers === 1 ? '' : 's' }}</span>
+        </div>
+        <div class="stat-item" id="openFollowingModal">
+          <!-- We'll attach a click event in JS to open the "Following" modal -->
+          <strong id="folNum">{{ $totalFollowing }}</strong>
+          <span>Following</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- User Info -->
-  <div class="user-info">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="username">
-        {{ $user->name ?? 'Username' }}
-      </div>
-      <button 
-        class="btn btn-outline-light btn-sm" 
-        data-bs-toggle="modal" 
-        data-bs-target="#editProfileModal"
+  <!-- Container Follow: "Find People to Follow" on same page -->
+  <div class="follow-container">
+    <h2>Find People to Follow</h2>
+
+    <!-- Search Bar (Optional AJAX Later) -->
+    <div class="search-bar">
+      <label for="searchUser" class="form-label">Search Users</label>
+      <input 
+        type="text" 
+        class="form-control" 
+        id="searchUser" 
+        placeholder="Type to search..."
+        autocomplete="off"
       >
-        Edit Profile
-      </button>
     </div>
 
-    <div class="description">
-      {{ $user->description ?? 'A little description...' }}
+    <!-- Filter: All, Followed, Unfollowed -->
+    <div class="d-flex mb-2" style="gap: 1rem;">
+      <label for="searchFilter" class="form-label my-auto">Filter:</label>
+      <select id="searchFilter" class="form-select form-select-sm" style="max-width:150px;">
+        <option value="all">All</option>
+        <option value="followed">Followed</option>
+        <option value="unfollowed">Unfollowed</option>
+      </select>
     </div>
 
-    <div class="stats-container">
-      <div class="stat-item" data-target="posts">
-        <strong>{{ $totalPosts }}</strong>
-        <span>Post{{ $totalPosts === 1 ? '' : 's' }}</span>
-      </div>
-      <div class="stat-item">
-        <strong>{{ $totalFollowers }}</strong>
-        <span>Follower{{ $totalFollowers === 1 ? '' : 's' }}</span>
-      </div>
-      <div class="stat-item">
-        <strong id="folNum">{{ $totalFollowing }}</strong>
-        <span >Following</span>
-      </div>
+    <!-- The user-list container (same as before, but we'll re-render it) -->
+    <div class="user-list" id="userList">
+      @foreach($otherUsers as $other)
+        @php
+          $isFollowed = DB::table('user_followers')
+              ->where('user_id', $other->id)
+              ->where('follower_id', auth()->id())
+              ->exists();
+        @endphp
+
+        <div class="user-item">
+          <div class="user-profile">
+            <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic">
+            <p class="username mb-0">{{ $other->name }}</p>
+          </div>
+
+          <button 
+            class="btn btn-sm follow-btn 
+              {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
+            data-user-id="{{ $other->id }}"
+            data-followed="{{ $isFollowed ? 'true' : 'false' }}"
+          >
+            {{ $isFollowed ? 'Followed' : 'Follow' }}
+          </button>
+        </div>
+      @endforeach
     </div>
   </div>
 </div>
 
-<!-- Container Follow: "Find People to Follow" on same page -->
-<div class="follow-container">
-  <h2>Find People to Follow</h2>
-
-  <!-- Search Bar (Optional AJAX Later) -->
-  <div class="search-bar">
-  <label for="searchUser" class="form-label">Search Users</label>
-  <input 
-    type="text" 
-    class="form-control" 
-    id="searchUser" 
-    placeholder="Type to search..."
-    autocomplete="off"
-  >
+<!-- Follower Modal -->
+<div class="modal-overlay" id="followersModalOverlay">
+  <div class="follower-list-modal">
+    <button class="close-modal-btn" id="closeFollowersModal">Close</button>
+    <h2 class="modal-title">Your Followers</h2>
+    <div class="modal-list" id="followersList"></div>
+  </div>
 </div>
 
-<!-- Filter: All, Followed, Unfollowed -->
-<div class="d-flex mb-2" style="gap: 1rem;">
-  <label for="searchFilter" class="form-label my-auto">Filter:</label>
-  <select id="searchFilter" class="form-select form-select-sm" style="max-width:150px;">
-    <option value="all">All</option>
-    <option value="followed">Followed</option>
-    <option value="unfollowed">Unfollowed</option>
-  </select>
+<!-- Following Modal -->
+<div class="modal-overlay" id="followingModalOverlay">
+  <div class="following-list-modal">
+    <button class="close-modal-btn" id="closeFollowingModal">Close</button>
+    <h2 class="modal-title">Who You're Following</h2>
+    <div class="modal-list" id="followingList"></div>
+  </div>
 </div>
-
-<!-- The user-list container (same as before, but we'll re-render it) -->
-<div class="user-list" id="userList">
-  @foreach($otherUsers as $other)
-    @php
-      $isFollowed = DB::table('user_followers')
-          ->where('user_id', $other->id)
-          ->where('follower_id', auth()->id())
-          ->exists();
-    @endphp
-
-    <div class="user-item">
-      <div class="user-profile">
-        <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic">
-        <p class="username mb-0">{{ $other->name }}</p>
-      </div>
-
-      <button 
-        class="btn btn-sm follow-btn 
-          {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
-        data-user-id="{{ $other->id }}"
-        data-followed="{{ $isFollowed ? 'true' : 'false' }}"
-      >
-        {{ $isFollowed ? 'Followed' : 'Follow' }}
-      </button>
-    </div>
-  @endforeach
-</div>
-</div>
-</div>
-
-
 
 <!-- Modal Edit Profile -->
 <div 
@@ -463,12 +559,106 @@
     document.querySelector('.mainn').classList.add('loaded');
   });
 
-  // If someone clicks on the Posts stat:
+  // If someone clicks on the Posts stat
   document.querySelectorAll('.stat-item[data-target="posts"]').forEach(item => {
     item.addEventListener('click', () => {
       window.location.href = "{{ route('homee') }}";
     });
   });
+
+  // Attach click events for opening modals
+  const openFollowersModalEl = document.getElementById('openFollowersModal');
+  const openFollowingModalEl = document.getElementById('openFollowingModal');
+  const followersModalOverlay = document.getElementById('followersModalOverlay');
+  const followingModalOverlay = document.getElementById('followingModalOverlay');
+  const followersListEl = document.getElementById('followersList');
+  const followingListEl = document.getElementById('followingList');
+
+  const closeFollowersBtn = document.getElementById('closeFollowersModal');
+  const closeFollowingBtn = document.getElementById('closeFollowingModal');
+
+  openFollowersModalEl.addEventListener('click', () => {
+    fetchFollowers(); // We'll define fetchFollowers() below
+    followersModalOverlay.classList.add('show');
+  });
+  openFollowingModalEl.addEventListener('click', () => {
+    fetchFollowing(); // We'll define fetchFollowing() below
+    followingModalOverlay.classList.add('show');
+  });
+
+  closeFollowersBtn.addEventListener('click', () => {
+    followersModalOverlay.classList.remove('show');
+  });
+  closeFollowingBtn.addEventListener('click', () => {
+    followingModalOverlay.classList.remove('show');
+  });
+
+  // AJAX to get followers
+  function fetchFollowers() {
+    fetch('/get-followers', {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to load followers');
+      return res.json();
+    })
+    .then(data => {
+      // data => array of user objects
+      followersListEl.innerHTML = '';
+      if (data.length > 0) {
+        data.forEach(u => {
+          const line = document.createElement('div');
+          line.classList.add('user-line');
+          line.innerHTML = `
+            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic">
+            <span>${u.name}</span>
+          `;
+          followersListEl.appendChild(line);
+        });
+      } else {
+        followersListEl.innerHTML = '<p style="text-align:center; color:#aaa;">No followers yet.</p>';
+      }
+    })
+    .catch(err => console.error(err));
+  }
+
+  // AJAX to get following
+  function fetchFollowing() {
+    fetch('/get-following', {
+      method: 'GET',
+      headers: {
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      }
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to load following');
+      return res.json();
+    })
+    .then(data => {
+      followingListEl.innerHTML = '';
+      if (data.length > 0) {
+        data.forEach(u => {
+          const line = document.createElement('div');
+          line.classList.add('user-line');
+          line.innerHTML = `
+            <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic">
+            <span>${u.name}</span>
+          `;
+          followingListEl.appendChild(line);
+        });
+      } else {
+        followingListEl.innerHTML = '<p style="text-align:center; color:#aaa;">You are not following anyone yet.</p>';
+      }
+    })
+    .catch(err => console.error(err));
+  }
+
+  
 
   // AJAX Follow/Unfollow
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

@@ -137,6 +137,10 @@
         color: #9C27B0; /* Purple */
         font-weight: bold;
     }
+    .notification-follow {
+        color: yellow; 
+        font-weight: bold;
+    }
 
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -201,7 +205,11 @@
 
                                 @case('reply')
                                     <strong>{{ $notification->user_name }}</strong> <span class="notification-reply">replied</span> to your comment.
-                                    @break
+                                    @break  
+                                
+                                @case('new_follower')
+                                    <strong>{{ $notification->user_name }}</strong> has <span class="notification-follow">followed</span> you.
+                                    @break     
 
                                 @default
                                     <strong>{{ $notification->user_name }}</strong> performed an action.

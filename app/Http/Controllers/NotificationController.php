@@ -25,6 +25,18 @@ class NotificationController extends Controller
         // Define a timeframe (e.g., last 24 hours)
         $timeFrame = Carbon::now()->subHours(24);
 
+        $newFollowers = DB::table('user_followers')
+            ->join('users', 'user_followers.follower_id', '=', 'users.id')
+            ->where('user_followers.user_id', $userId)
+            ->where('user_followers.seen', 0)
+            ->where('user_followers.created_at', '>=', $timeFrame)
+            ->select(
+                'user_followers.id as follower_id',
+                'users.name as user_name',
+                'user_followers.created_at'
+            )
+            ->get();
+
         // Fetch likes on user's posts
         $likes = DB::table('likes')
             ->join('users', 'likes.user_id', '=', 'users.id')
@@ -120,6 +132,12 @@ class NotificationController extends Controller
                 'created_at' => $item->created_at,
                 'comment_id' => $item->comment_id,
             ];
+        }))->merge($newFollowers->map(function ($item) {
+            return (object)[
+                'type' => 'new_follower',
+                'user_name' => $item->user_name,
+                'created_at' => $item->created_at,
+            ];
         }));
 
         // Sort notifications by created_at descending
@@ -150,6 +168,11 @@ class NotificationController extends Controller
                 FROM likes
                 JOIN posts ON likes.post_id = posts.id
                 WHERE posts.user_id = $userId AND likes.seen = 0
+
+                UNION ALL
+
+                SELECT id FROM user_followers
+                WHERE user_id = $userId AND seen = 0
     
                 UNION ALL
     
@@ -251,6 +274,11 @@ class NotificationController extends Controller
             ->where('posts.user_id', $userId)
             ->where('replies.seen', 0)
             ->update(['replies.seen' => 1]);
+
+        DB::table('user_followers')
+            ->where('user_id', $userId)
+            ->where('seen', 0)
+            ->update(['seen' => 1]);    
 
         return response()->json(['success' => true]);
     }
