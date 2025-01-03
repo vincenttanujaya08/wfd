@@ -80,6 +80,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->name('unfollow.ajax');
 
     Route::get('/search-users', [ProfileController::class, 'searchUsers'])->name('users.search');
+    
+    Route::get('/get-followers', [FollowController::class, 'getFollowers']);
+
+    // Get the current user's following
+    Route::get('/get-following', [FollowController::class, 'getFollowing']);
 
     
 });

@@ -9,6 +9,41 @@ use Illuminate\Support\Facades\DB;
 
 class FollowController extends Controller
 {
+    public function getFollowers()
+    {
+        $authUserId = Auth::id();
+
+        // Get all users that follow me (i.e., user_followers where user_id = me)
+        // We'll join or query the 'users' table to get their names, images, etc.
+        $followerIds = DB::table('user_followers')
+            ->where('user_id', $authUserId)
+            ->pluck('follower_id');
+
+        $followers = User::whereIn('id', $followerIds)
+            ->select('id', 'name', 'profile_image')
+            ->get();
+
+        return response()->json($followers, 200);
+    }
+
+    /**
+     * Return the current user's "following" in JSON form.
+     */
+    public function getFollowing()
+    {
+        $authUserId = Auth::id();
+
+        // user_followers where follower_id = me -> user_id are the people I'm following
+        $followingIds = DB::table('user_followers')
+            ->where('follower_id', $authUserId)
+            ->pluck('user_id');
+
+        $following = User::whereIn('id', $followingIds)
+            ->select('id', 'name', 'profile_image')
+            ->get();
+
+        return response()->json($following, 200);
+    }
     /**
      * Follow a user (via AJAX).
      */
