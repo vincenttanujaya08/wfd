@@ -365,7 +365,8 @@
     <div class="profile-image">
       <img 
         src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}" 
-        alt="Profile Image"
+        alt="Profile Image Not Found"
+        onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
       />
     </div>
 
