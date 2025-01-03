@@ -733,7 +733,7 @@
             const header = document.createElement('div');
             header.classList.add('post-header');
             header.innerHTML = `
-                <img src="${post.user.profile_image}" alt="User Profile Picture" class="profile-pic">
+                <img src="${post.user.profile_image}" alt="User Profile Picture" class="profile-pic"  onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
                 <div class="username">${post.user.name}</div>
                 <div class="time">${timeAgo(new Date(post.created_at))}</div>
             `;
