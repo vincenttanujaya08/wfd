@@ -67,4 +67,22 @@ class CommentController extends Controller
         CommentLike::create(['comment_id' => $commentId, 'user_id' => $userId]);
         return response()->json(['message' => 'Comment liked.', 'likes_count' => $comment->likes()->count()]);
     }
+    public function deleteComment($commentId)
+    {
+        $comment = Comment::findOrFail($commentId);
+
+        // Check if the logged-in user is the owner of the comment
+        if ($comment->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Delete all replies associated with the comment
+        $comment->replies()->delete();
+
+        // Delete the comment itself
+        $comment->delete();
+
+        return response()->json(['message' => 'Comment deleted successfully']);
+    }
+
 }

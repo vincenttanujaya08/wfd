@@ -86,7 +86,9 @@ Route::middleware(['auth'])->group(function () {
     // Get the current user's following
     Route::get('/get-following', [FollowController::class, 'getFollowing']);
 
-    
+    Route::delete('/comments/{commentId}', [CommentController::class, 'deleteComment'])->middleware('auth');
+    Route::delete('/replies/{replyId}', [ReplyController::class, 'deleteReply'])->middleware('auth');
+
 });
 //Profile
 
