@@ -666,6 +666,10 @@
 
         // Initial Load
         fetchPosts(currentSort, currentPage);
+        const currentUser = {
+            id: {{ auth()->user()->id }},
+            name: "{{ auth()->user()->name }}"
+        };
 
         // Event Listeners
         sortSelect.addEventListener('change', () => {
@@ -923,6 +927,7 @@ function createCommentWithReplies(comment) {
                 </span>
             </span>
             <span class="comment-time">${new Date(comment.created_at).toLocaleString()}</span>
+            ${comment.user.id === currentUser.id ? '<button class="delete-comment-btn">Delete</button>' : ''}
         </div>
         <div class="comment-text">${comment.text}</div>
         <div class="comment-actions">
@@ -990,8 +995,53 @@ function createCommentWithReplies(comment) {
             })
             .catch(error => console.error('Error liking comment:', error));
     });
+    // Delete comment button handler
+    const deleteCommentBtn = commentItem.querySelector('.delete-comment-btn');
+    if (deleteCommentBtn) {
+        deleteCommentBtn.addEventListener('click', () => deleteComment(comment.id));
+    }
 
     return commentItem;
+}
+
+function deleteComment(commentId) {
+    fetch(`/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete comment');
+        }
+        return response.json();
+    })
+    .then(data => {
+        showComments(currentPostId); // Refresh comments
+    })
+    .catch(error => console.error('Error deleting comment:', error));
+}
+
+function deleteReply(replyId) {
+    fetch(`/replies/${replyId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete reply');
+        }
+        return response.json();
+    })
+    .then(data => {
+        showComments(currentPostId); // Refresh comments
+    })
+    .catch(error => console.error('Error deleting reply:', error));
 }
 
 
@@ -1015,9 +1065,14 @@ function fetchReplies(commentId, repliesList) {
                                 ${reply.user.name}
                                 </span>
                             <span class="comment-time">${new Date(reply.created_at).toLocaleString()}</span>
+                            ${currentUser && reply.user.id === currentUser.id ? '<button class="delete-reply-btn">Delete</button>' : ''}
                         </div>
                         <div class="comment-text">${reply.text}</div>
                     `;
+                    const deleteReplyBtn = replyElement.querySelector('.delete-reply-btn');
+                    if (deleteReplyBtn) {
+                        deleteReplyBtn.addEventListener('click', () => deleteReply(reply.id));
+                    }
                     repliesList.appendChild(replyElement);
                 });
             }
