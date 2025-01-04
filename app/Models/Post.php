@@ -23,7 +23,8 @@ class Post extends Model
 
     public function topics()
     {
-        return $this->belongsToMany(Topic::class, 'post_topic');
+        // Also pivot table 'post_topic'
+        return $this->belongsToMany(Topic::class, 'post_topic', 'post_id', 'topic_id');
     }
 
     public function likes()

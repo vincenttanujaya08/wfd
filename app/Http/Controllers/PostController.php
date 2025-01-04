@@ -31,82 +31,82 @@ class PostController extends Controller
      * Store a newly created post in storage.
      */
     public function store(StorePostRequest $request)
-{
-    // Validate the request data
-    $validated = $request->validate([
-        'description' => 'required|string|max:255',
-        'status' => 'required|in:public,private',
-        'topic' => 'nullable|string|max:255',
-        'image_links.*' => 'nullable|url',
-    ]);
+    {
+        // Validate the request data
+        $validated = $request->validate([
+            'description' => 'required|string|max:255',
+            'status' => 'required|in:public,private',
+            'topic' => 'nullable|string|max:255',
+            'image_links.*' => 'nullable|url',
+        ]);
 
-    // Validate image links
-    if (!empty($request->image_links)) {
-        foreach ($request->image_links as $key => $imageLink) {
-            if (!$this->isValidImage($imageLink)) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(["image_links.$key" => 'Invalid image link.']);
+        // Validate image links
+        if (!empty($request->image_links)) {
+            foreach ($request->image_links as $key => $imageLink) {
+                if (!$this->isValidImage($imageLink)) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(["image_links.$key" => 'Invalid image link.']);
+                }
             }
         }
-    }
 
-    // Step 1: Create the post
-    $post = Post::create([
-        'user_id' => auth()->id(),
-        'description' => $request->description,
-        'status' => $request->status === 'public' ? 1 : 0,
-        'likes_count' => 0,
-    ]);
+        // Step 1: Create the post
+        $post = Post::create([
+            'user_id' => auth()->id(),
+            'description' => $request->description,
+            'status' => $request->status === 'public' ? 1 : 0,
+            'likes_count' => 0,
+        ]);
 
-    // Step 2: Handle topics
-    $topicIds = [];
+        // Step 2: Handle topics
+        $topicIds = [];
 
-    if (!empty($request->topic)) {
-        $topicName = trim($request->topic);
-        if ($topicName !== '') {
-            $topic = Topic::firstOrCreate(
-                ['name' => $topicName],
-                ['slug' => Str::slug($topicName)]
-            );
-            $topicIds[] = $topic->id;
+        if (!empty($request->topic)) {
+            $topicName = trim($request->topic);
+            if ($topicName !== '') {
+                $topic = Topic::firstOrCreate(
+                    ['name' => $topicName],
+                    ['slug' => Str::slug($topicName)]
+                );
+                $topicIds[] = $topic->id;
+            }
         }
-    }
 
-    // Attach topics to the post
-    if (!empty($topicIds)) {
-        $post->topics()->sync($topicIds);
-    }
-
-    // Step 3: Handle images
-    if (!empty($request->image_links)) {
-        foreach ($request->image_links as $imageLink) {
-            Image::create([
-                'post_id' => $post->id,
-                'path' => $imageLink,
-            ]);
+        // Attach topics to the post
+        if (!empty($topicIds)) {
+            $post->topics()->sync($topicIds);
         }
+
+        // Step 3: Handle images
+        if (!empty($request->image_links)) {
+            foreach ($request->image_links as $imageLink) {
+                Image::create([
+                    'post_id' => $post->id,
+                    'path' => $imageLink,
+                ]);
+            }
+        }
+
+        // Redirect back with success message
+        return redirect()->route('upload')->with('success', 'Post created successfully!');
     }
 
-    // Redirect back with success message
-    return redirect()->route('upload')->with('success', 'Post created successfully!');
-}
+    private function isValidImage($url)
+    {
+        try {
+            $headers = get_headers($url, 1);
 
-private function isValidImage($url)
-{
-    try {
-        $headers = get_headers($url, 1);
-
-        if (isset($headers['Content-Type'])) {
-            $contentType = is_array($headers['Content-Type']) ? $headers['Content-Type'][0] : $headers['Content-Type'];
-            return str_starts_with($contentType, 'image/');
+            if (isset($headers['Content-Type'])) {
+                $contentType = is_array($headers['Content-Type']) ? $headers['Content-Type'][0] : $headers['Content-Type'];
+                return str_starts_with($contentType, 'image/');
+            }
+        } catch (\Exception $e) {
+            return false;
         }
-    } catch (\Exception $e) {
+
         return false;
     }
-
-    return false;
-}
 
     /**
      * Like or unlike a post.
@@ -206,38 +206,55 @@ private function isValidImage($url)
         return view('homee', compact('posts'));
     }
 
+
+
+
     public function fetchPosts(Request $request)
     {
-        $sort = $request->get('sort', 'newest'); // Default to 'newest' if not provided
+        $sort = $request->get('sort', 'newest');      // e.g. newest, oldest, popular
+        $filter = $request->get('filter', 'showAll'); // e.g. showAll, followedOnly
 
-        // Start building the query with the status filter
-        $query = Post::where('status', 1) // Only fetch public posts
-            ->with(['user', 'images', 'comments.user']);
+        // Always fetch only public posts
+        $query = Post::where('status', 1)
+            ->with(['user', 'images', 'comments.user', 'likes']);
 
-        // Apply sorting based on the request
+        // 1) Apply filter (Followed Only or Show All)
+        if ($filter === 'followedOnly') {
+            // Get IDs of users the current auth user follows
+            // "follower_id" = the user doing the following, "user_id" = the one being followed
+            $followedUserIds = DB::table('user_followers')
+                ->where('follower_id', auth()->id())
+                ->pluck('user_id');
+
+            $query->whereIn('user_id', $followedUserIds);
+        }
+
+        // 2) Apply sorting
         switch ($sort) {
             case 'popular':
                 $query->orderBy('likes_count', 'desc');
                 break;
-
             case 'oldest':
                 $query->orderBy('created_at', 'asc');
                 break;
-
             case 'newest':
             default:
                 $query->orderBy('created_at', 'desc');
                 break;
         }
 
-        // Implement pagination (fetch 10 posts per page)
-        $posts = $query->paginate(10);
+        // 3) Paginate results (or you can limit them)
+        $posts = $query->paginate(9);
+
+        // 4) Mark which posts are "liked" by the current user
         $posts->getCollection()->transform(function ($post) {
             $post->liked = $post->likes->contains('user_id', auth()->id());
             return $post;
         });
+
         return response()->json($posts);
     }
+
 
 
     public function getDetails($id)
@@ -387,5 +404,69 @@ private function isValidImage($url)
             'status' => $post->status,
             'message' => 'Post status updated successfully!',
         ]);
+    }
+
+    /**
+     * Fetch posts by topic name, sorted by newest.
+     */
+    public function fetchPostsByTopic($topicName)
+    {
+        // 1) Find the topic by its name
+        $topic = \App\Models\Topic::where('name', $topicName)->first();
+        if (!$topic) {
+            return response()->json([
+                'message' => 'Topic not found.',
+            ], 404);
+        }
+
+        // 2) Get all posts for this topic
+        //    Only public posts => status = 1
+        //    Sorted by newest => created_at DESC
+        $posts = $topic->posts()
+            ->where('status', 1)
+            ->with(['user', 'images', 'comments.user', 'likes'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 3) Mark posts as liked by the current user
+        if (auth()->check()) {
+            $posts->transform(function ($post) {
+                $post->liked = $post->likes->contains('user_id', auth()->id());
+                return $post;
+            });
+        }
+
+        return response()->json($posts);
+    }
+
+    /**
+     * Fetch posts by username, sorted by newest.
+     */
+    public function fetchPostsByUsername($username)
+    {
+        // 1) Find the user by their name
+        $user = \App\Models\User::where('name', $username)->first();
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // 2) Get all public posts from this user, newest first
+        $posts = \App\Models\Post::where('user_id', $user->id)
+            ->where('status', 1)
+            ->with(['user', 'images', 'comments.user', 'likes'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 3) Mark posts as liked by the current user
+        if (auth()->check()) {
+            $posts->transform(function ($post) {
+                $post->liked = $post->likes->contains('user_id', auth()->id());
+                return $post;
+            });
+        }
+
+        return response()->json($posts);
     }
 }

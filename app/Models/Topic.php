@@ -12,6 +12,7 @@ class Topic extends Model
     // Relationships
     public function posts()
     {
-        return $this->belongsToMany(Post::class, 'post_topic');
+        // Assumes pivot table 'post_topic' with columns 'post_id' and 'topic_id'
+        return $this->belongsToMany(Post::class, 'post_topic', 'topic_id', 'post_id');
     }
 }
