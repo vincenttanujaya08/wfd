@@ -177,23 +177,22 @@ class PostController extends Controller
      * Delete a post.
      */
     public function destroy(Post $post)
-    {
-        // Ensure the authenticated user owns the post
-        if ($post->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        // Delete related images first due to foreign key constraints
-        $post->images()->delete();
-
-        // Detach topics
-        $post->topics()->detach();
-
-        // Delete the post
-        $post->delete();
-
-        return response()->json(['message' => 'Post deleted successfully!']);
+{
+    if ($post->user_id !== Auth::id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
+
+    $post->images()->delete();
+    $topicIds = $post->topics()->pluck('topics.id')->toArray();
+    $post->topics()->detach();
+    $post->delete();
+
+    // Hapus topik yang tidak memiliki postingan terkait
+    Topic::whereDoesntHave('posts')->whereIn('id', $topicIds)->delete();
+
+    return response()->json(['message' => 'Post deleted successfully!']);
+}
+
 
     public function home()
     {
