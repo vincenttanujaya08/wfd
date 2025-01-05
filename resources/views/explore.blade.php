@@ -575,6 +575,16 @@
     .content-wrapper.loaded {
         opacity: 1;
     }
+
+    .highlighted {
+    background-color: #555; /* Darker background for better contrast */
+    color: #fff !important;  /* White text for readability */
+    border-left: 4px solid #008cba; /* Accent border to emphasize selection */
+    padding-left: 0.5rem; /* Slight padding for aesthetic spacing */
+    border-radius: 4px; /* Rounded corners for a smoother look */
+    transition: background-color 0.3s, color 0.3s, border-left 0.3s; /* Smooth transitions */
+}
+
 </style>
 
 <div class="content-wrapper">
@@ -664,7 +674,25 @@
 </script>
 <script>
     // Ensure that the DOM is fully loaded before executing scripts
+    let selectedTopicElement = null;
+    let selectedTopicName = null;  // <-- Tambahkan
+    let selectedUserElement = null;
+    let selectedUserName = null;   // <-- Tambahkan
     document.addEventListener('DOMContentLoaded', () => {
+
+        function removeAllHighlights() {
+        if (selectedTopicElement) {
+            selectedTopicElement.classList.remove('highlighted');
+            selectedTopicElement = null;
+            selectedTopicName = null;
+        }
+        if (selectedUserElement) {
+            selectedUserElement.classList.remove('highlighted');
+            selectedUserElement = null;
+            selectedUserName = null;
+        }
+    }
+
         // Select Elements
         const postContainer = document.getElementById('postContainer');
         const seeMorePostsBtn = document.getElementById('seeMorePostsBtn');
@@ -700,84 +728,103 @@
         ///////////////////////////////
     // 1) HANDLE TOPIC CLICKS   //
     ///////////////////////////////
-    if (topicContainer) {
-        topicContainer.addEventListener('click', (e) => {
-            // Check if an <a> with class "clickabletopic" was clicked
-            if (e.target && e.target.classList.contains('clickabletopic')) {
-                e.preventDefault();
-                // The 'id' of the <a> is the topic name
-                const topicName = e.target.id; // e.g. "bkeijerjer"
-                
-                const headerTitle = document.querySelector('.feed-header h2');
-                headerTitle.textContent = '#' + topicName;
+    topicContainer.addEventListener('click', (e) => {
+        if (e.target && e.target.classList.contains('clickabletopic')) {
+            e.preventDefault();
+            const topicName = e.target.id;
 
-                // Clear existing posts
-                postContainer.innerHTML = '';
-
-                // Fetch posts for this topic
-                fetch(`/posts/topic/${topicName}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // If topic not found
-                        if (data.message === 'Topic not found.') {
-                            postContainer.innerHTML = '<p>Topic not found.</p>';
-                            return;
-                        }
-                        // data is an array of post objects
-                        data.forEach(post => {
-                            const postElement = createPostElement(post);
-                            postContainer.appendChild(postElement);
-                        });
-                        resetPostsBtn.style.display = 'inline-block';
-                        seeMorePostsBtn.style.display = 'none';
-                    })
-                    .catch(err => console.error('Error fetching posts by topic:', err));
+            // Hapus highlight sebelumnya
+            if (selectedTopicElement && selectedTopicElement !== e.target) {
+                selectedTopicElement.classList.remove('highlighted');
             }
-        });
-    }
+            e.target.classList.add('highlighted');
+            selectedTopicElement = e.target;
+            selectedTopicName = e.target.id;
+
+
+            // Hapus highlight pengguna jika ada
+            if (selectedUserElement) {
+            selectedUserElement.classList.remove('highlighted');
+            selectedUserElement = null;
+            selectedUserName = null;
+        }
+
+            // Update judul dan muat postingan
+            headerTitle.textContent = '#' + topicName;
+            postContainer.innerHTML = '';
+
+            fetch(`/posts/topic/${topicName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Topic not found.') {
+                        postContainer.innerHTML = '<p>Topic not found.</p>';
+                        return;
+                    }
+                    data.forEach(post => {
+                        const postElement = createPostElement(post);
+                        postContainer.appendChild(postElement);
+                    });
+                    resetPostsBtn.style.display = 'inline-block';
+                    seeMorePostsBtn.style.display = 'none';
+                })
+                .catch(err => console.error('Error fetching posts by topic:', err));
+        }
+    });
 
     ///////////////////////////////
     // 2) HANDLE USER CLICKS    //
     ///////////////////////////////
+    // HANDLE USER CLICKS
     if (profileContainer) {
-        resetPostsBtn.style.display = 'none';
         profileContainer.addEventListener('click', (e) => {
-            // We want to detect clicks on the <div class="user-list-item" id="USERNAME">
             const userDiv = e.target.closest('.user-list-item');
             if (userDiv) {
                 e.preventDefault();
-                // The 'id' of the <div> is the username
-                const username = userDiv.id; // e.g. "lesgo"
-                headerTitle.textContent = username+"'s Posts";
+                const username = userDiv.id;
+                if (selectedUserElement && selectedUserElement !== userDiv) {
+            selectedUserElement.classList.remove('highlighted');
+        }
 
-                // Clear existing posts
+                // Hapus highlight dari elemen sebelumnya
+                removeAllHighlights();
+
+                // Tambahkan highlight ke profil yang dipilih
+                userDiv.classList.add('highlighted');
+                selectedUserElement = userDiv;
+                selectedUserName = username;
+
+                if (selectedTopicElement) {
+            selectedTopicElement.classList.remove('highlighted');
+            selectedTopicElement = null;
+            selectedTopicName = null;
+        }
+                // Update judul dan muat postingan
+                headerTitle.textContent = `${username}'s Posts`;
                 postContainer.innerHTML = '';
 
-                // Fetch posts for this user
                 fetch(`/posts/user/${username}`)
                     .then(response => response.json())
                     .then(data => {
-                        // If user not found
                         if (data.message === 'User not found.') {
                             postContainer.innerHTML = '<p>User not found.</p>';
                             return;
                         }
-                        // data is an array of post objects
                         data.forEach(post => {
                             const postElement = createPostElement(post);
                             postContainer.appendChild(postElement);
                         });
                         resetPostsBtn.style.display = 'inline-block';
                         seeMorePostsBtn.style.display = 'none';
-                    
                     })
                     .catch(err => console.error('Error fetching posts by user:', err));
             }
         });
     }
+
         
         // Event Listeners
         sortSelect.addEventListener('change', () => {
+            removeAllHighlights()
             currentSort = sortSelect.value; // newest, oldest, popular
             switch (currentSort) {
             case 'newest':
@@ -798,6 +845,7 @@
         });
 
         followedSelect.addEventListener('change', () => {
+            removeAllHighlights();
             currentFilter = followedSelect.value; // showAll, followedOnly
             currentPage = 1;
             postContainer.innerHTML = '';
@@ -827,6 +875,7 @@
         });
 
         resetPostsBtn.addEventListener('click', () => {
+            removeAllHighlights();
             // Reset everything
             seeMorePostsBtn.style.display = 'inline-block';
             currentSort = 'newest';
@@ -1382,7 +1431,14 @@
             a.href = '#';
             a.textContent = '# ' + t; // 't' karena di /topics/all-shuffled => pluck('name')
             topicContainer.appendChild(a);
+
+            if (t === selectedTopicName) {
+            a.classList.add('highlighted');
+            selectedTopicElement = a; 
+        }
         });
+
+       
 
         topicIndex += topicChunkSize;
 
@@ -1560,6 +1616,11 @@
 
             // Append the user item to the profile container
             profileContainer.appendChild(userItem);
+
+            if (user.name === selectedUserName) {
+            userItem.classList.add('highlighted');
+            selectedUserElement = userItem;
+        }
         });
 
         profileIndex += userChunkSize;
@@ -1598,4 +1659,4 @@
 
 </script>
 
-@endsection
+@endsection 
