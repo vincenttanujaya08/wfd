@@ -584,7 +584,38 @@
     border-radius: 4px; /* Rounded corners for a smoother look */
     transition: background-color 0.3s, color 0.3s, border-left 0.3s; /* Smooth transitions */
 }
+    .delete-comment-btn,
+    .delete-reply-btn{
+        border-style: none;
+        border-radius: 5px;
+        padding: 5px;
+        background-color: rgb(189, 0, 0);
+        color: #fff;
+    }
 
+    .delete-comment-btn:hover,
+    .delete-reply-btn:hover{
+        background-color: rgb(123, 0, 0);
+    }
+
+    .post-comment-btn,
+    .input-reply{
+        border-style: solid;
+        border-color: rgb(92, 92, 92);
+        background-color: rgb(29, 29, 29);
+        border-radius: 5px;
+        color: #fff;
+        padding: 4px 3px;
+        border-width: 1px;
+    
+    }
+    .post-comment-btn:hover{
+        
+        background-color: rgba(0, 0, 0, 0.2);
+       
+    }
+    
+    
 </style>
 
 <div class="content-wrapper">
@@ -1148,8 +1179,8 @@
         </div>
         <div class="replies-list" id="replies-${comment.id}" style="margin-left: 20px; margin-top: 10px;"></div>
         <form class="reply-form" id="reply-form-${comment.id}" style="display: none; margin-top: 10px;">
-            <input type="text" placeholder="Write a reply..." required />
-            <button type="submit">Reply</button>
+            <input class = "input-reply" type="text" placeholder="Write a reply..." required />
+            <button type="submit" class="post-comment-btn">Reply</button>
         </form>
         `;
 
