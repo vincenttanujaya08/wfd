@@ -50,7 +50,7 @@
 
         .bottom-text {
             position: absolute;
-            bottom: 20px;
+            bottom: 75px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
@@ -83,7 +83,7 @@
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card shadow-lg p-4 w-100 max-w-md rounded-lg mx-3 my-4">
             <div class="text-center mb-4">
-                <h2 class="text-3xl font-bold text-gray-700">Welcome Back to Todit!</h2>
+                <h2 class="text-3xl font-bold text-gray-700">Welcome Back to Toddit!</h2>
                 <p class="text-gray-500">Login to your account</p>
             </div>
 
@@ -99,15 +99,10 @@
                     <label for="password" class="form-label text-gray-700">Password</label>
                     <input type="password" id="password" name="password" class="form-control p-2 border border-gray-300 rounded-md" placeholder="Enter your password" required>
                 </div>
-                <div class="mb-3 text-end">
-                    <a class="text-sm text-blue-500 hover:underline">Forgot Password?</a>
-                </div>
                 <button type="submit" class="btn btn-primary w-100 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                     Login
                 </button>
             </form>
-
-
 
             <div class="mt-4 text-center">
                 <form method="GET" action="{{ route('signup') }}">

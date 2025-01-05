@@ -63,7 +63,7 @@
         }
         .bottom-text {
             position: absolute;
-            bottom: 20px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
@@ -91,7 +91,7 @@
         <div class="card shadow-lg w-100 mx-3 my-4">
             <div class="text-center mb-3">
                 <h2 class="text-3xl font-bold text-gray-700">Create an Account</h2>
-                <p class="text-gray-500">Join Todit today</p>
+                <p class="text-gray-500">Join Toddit today</p>
             </div>
 
             <form action="{{ url('/signup') }}" method="POST">
