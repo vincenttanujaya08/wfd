@@ -117,6 +117,77 @@
         transform: scale(1.05);
     }
 
+    /* Confirm Modal Styles */
+    #clearConfirmModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #clearConfirmModal.show {
+        display: flex;
+    }
+
+    #clearConfirmModal .modal {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    #clearConfirmModal .modal h3 {
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    #clearConfirmModal .modal p {
+        color: #ccc;
+        margin-bottom: 1.5rem;
+    }
+
+    #clearConfirmModal .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    #clearConfirmModal .modal-actions button {
+        padding: 0.6rem 1rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    #clearConfirmModal .btn-cancel {
+        background: #800;
+        color: #fff;
+    }
+
+    #clearConfirmModal .btn-cancel:hover {
+        background: #900;
+    }
+
+    #clearConfirmModal .btn-proceed {
+        background: #4CAF50;
+        color: #fff;
+    }
+
+    #clearConfirmModal .btn-proceed:hover {
+        background: #45a049;
+    }
+
     /* Notification Types Styles */
     .notification-like {
         color: #4CAF50; /* Green */
@@ -155,11 +226,11 @@
         }
     }
     .content-wrapper{
-    opacity: 0;
-    transition: opacity 1s ease-in;
-}
-.content-wrapper.loaded {
-      opacity: 1;
+        opacity: 0;
+        transition: opacity 1s ease-in;
+    }
+    .content-wrapper.loaded {
+        opacity: 1;
     }
 </style>
 
@@ -226,22 +297,44 @@
         </table>
     </div>
 </div>
+
+<!-- Clear Notifications Modal -->
+<div id="clearConfirmModal">
+    <div class="modal">
+        <h3>Confirm Action</h3>
+        <p>Are you sure you want to clear all notifications?</p>
+        <div class="modal-actions">
+            <button id="cancelClearBtn" class="btn-cancel">Cancel</button>
+            <button id="proceedClearBtn" class="btn-proceed">Clear</button>
+        </div>
+    </div>
+</div>
+
 <script>
-     window.addEventListener('load', function() {
-      document.querySelector('.content-wrapper').classList.add('loaded');
+    window.addEventListener('load', function() {
+        document.querySelector('.content-wrapper').classList.add('loaded');
     });
-</script>
 
-<script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Handle clear notifications click
         const clearNotificationsBtn = document.getElementById('clearNotificationsBtn');
-        clearNotificationsBtn.addEventListener('click', () => {
-            if (!confirm('Are you sure you want to clear all notifications?')) {
-                return;
-            }
+        const clearConfirmModal = document.getElementById('clearConfirmModal');
+        const cancelClearBtn = document.getElementById('cancelClearBtn');
+        const proceedClearBtn = document.getElementById('proceedClearBtn');
 
-            fetch("{{ route('clear.notifications') }}", { // Ensure the route name matches your routes
+        // Show the confirmation modal
+        clearNotificationsBtn.addEventListener('click', () => {
+            clearConfirmModal.classList.add('show');
+        });
+
+        // Hide the confirmation modal
+        cancelClearBtn.addEventListener('click', () => {
+            clearConfirmModal.classList.remove('show');
+        });
+
+        // Proceed with clearing notifications
+        proceedClearBtn.addEventListener('click', () => {
+            clearConfirmModal.classList.remove('show'); // Close the modal
+            fetch("{{ route('clear.notifications') }}", { // Ensure the route matches your routes
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -252,15 +345,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Notifications cleared successfully.');
+        
                     location.reload(); // Reload the page to update the UI
                 } else {
-                    alert('Failed to clear notifications. Please try again.');
+                   
                 }
             })
             .catch(error => {
                 console.error('Error clearing notifications:', error);
-                alert('An error occurred. Please try again.');
+               
             });
         });
     });
