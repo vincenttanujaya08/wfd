@@ -32,6 +32,14 @@ Route::get('/', function () {
     return view('home');
 });
 
+Route::get('/home', function () {
+    if (Auth::check()) {
+        // Redirect the logged-in user to /explore
+        return redirect()->route('explore');
+    }
+    return view('home');
+});
+
 Route::get('/explore', function () {
     return view('explore');
 })->name('explore');
