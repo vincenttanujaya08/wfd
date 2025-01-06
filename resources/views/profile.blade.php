@@ -355,6 +355,15 @@
     object-fit: cover;
     border-radius: 50%;
   }
+  .user-profile-image {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.user-profile-image:hover {
+    transform: scale(1.1);
+}
+
 </style>
 
 <!-- Main Wrapper -->
@@ -446,8 +455,15 @@
 
         <div class="user-item">
           <div class="user-profile">
-            <img src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}" alt="User Pic"
-            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
+          <img
+    src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}"
+    alt="User Pic"
+    onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
+    class="user-profile-image"
+    data-bs-toggle="modal"
+    data-bs-target="#userDetailModal"
+    data-user-id="{{ $other->id }}"
+>
             <p class="username mb-0">{{ $other->name }}</p>
           </div>
 
@@ -461,6 +477,25 @@
           </button>
         </div>
       @endforeach
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userDetailModalLabel">User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <img id="modalProfileImage" src="" alt="Profile Pic" class="rounded-circle mb-3" width="100" height="100">
+        </div>
+        <h4 id="modalUsername" class="text-center"></h4>
+        <p id="modalDescription" class="text-center"></p>
+      </div>
     </div>
   </div>
 </div>
@@ -556,6 +591,43 @@
 </script>
 
 <script>
+  //opening details
+  document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.getElementById('userDetailModal');
+
+  modal.addEventListener('show.bs.modal', function (event) {
+    const triggerElement = event.relatedTarget; // The element that triggered the modal
+    const userId = triggerElement.getAttribute('data-user-id');
+
+    // Check if userId is being sent
+    console.log("User ID:", userId);
+
+    // Make an AJAX request to fetch user details
+    fetch(`/user-details/${userId}`)
+      .then(response => {
+        console.log("Response Status:", response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log("Data Received:", data);
+
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Populate modal fields with user data
+        document.getElementById('modalProfileImage').src = data.profile_image || 'https://via.placeholder.com/100';
+        document.getElementById('modalUsername').textContent = data.name || 'Unknown';
+        document.getElementById('modalDescription').textContent = data.description || 'No description available.';
+      })
+      .catch(error => {
+        console.error('Error fetching user details:', error);
+      });
+  });
+});
+
+
   // Fade in the profile container
   window.addEventListener('load', function() {
     document.querySelector('.mainn').classList.add('loaded');
