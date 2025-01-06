@@ -781,7 +781,7 @@
         }
 
             // Update judul dan muat postingan
-            headerTitle.textContent = '#' + topicName;
+            headerTitle.textContent = '# ' + topicName;
             postContainer.innerHTML = '';
 
             fetch(`/posts/topic/${topicName}`)
