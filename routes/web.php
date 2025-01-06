@@ -188,5 +188,24 @@ Route::get('/posts/topic/{topicName}', [PostController::class, 'fetchPostsByTopi
 // 2) Fetch posts by username
 Route::get('/posts/user/{username}', [PostController::class, 'fetchPostsByUsername']);
 
+use App\Models\User;
+Route::get('/user-details/{id}', function ($id) {
+    
+   
+
+    $user = User::find($id);
+
+    if ($user) {
+        return response()->json([
+            'name' => $user->name,
+            'profile_image' => $user->profile_image,
+            'description' => $user->description,
+        ]);
+    }
+
+    return response()->json(['error' => 'User not found'], 404);
+});
+
+
 
 
