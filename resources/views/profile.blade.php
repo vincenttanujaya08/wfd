@@ -3,18 +3,18 @@
 @section('title', 'User Profile')
 
 @section('content')
-<link 
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-  rel="stylesheet" 
-  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
-  crossorigin="anonymous"
-/>
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+  crossorigin="anonymous" />
 
 <!-- CSRF meta for AJAX -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 <style>
-  html, body {
+  html,
+  body {
     margin: 0;
     padding: 0;
     background: linear-gradient(to bottom right, #000, #111);
@@ -45,9 +45,11 @@
   }
 
   .mainn {
-    opacity: 0; /* For fade-in effect */
-    transition: opacity 1s ease-in; 
+    opacity: 0;
+    /* For fade-in effect */
+    transition: opacity 1s ease-in;
   }
+
   .mainn.loaded {
     opacity: 1;
   }
@@ -57,6 +59,7 @@
       border-color: rgba(255, 255, 255, 0.5);
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
+
     to {
       border-color: rgba(255, 255, 255, 1);
       box-shadow: 0 0 20px rgba(255, 255, 255, 1);
@@ -128,7 +131,8 @@
     justify-content: center;
     align-items: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer; /* So it looks clickable */
+    cursor: pointer;
+    /* So it looks clickable */
   }
 
   .stat-item:hover {
@@ -209,72 +213,86 @@
     max-width: 900px;
     margin: 2rem auto;
     padding: 20px;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0, 0, 0, 0.75);
     border-radius: 10px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
     color: #fff;
   }
+
   .follow-container h2 {
     margin-bottom: 1rem;
   }
+
   .search-bar {
     margin-bottom: 1rem;
   }
+
   .search-bar input {
     background-color: #333;
     border: 1px solid #444;
     color: #fff;
   }
+
   .search-bar input:focus {
     background-color: #444;
     border-color: #888;
   }
+
   .user-list {
     margin-top: 1rem;
-    max-height: 360px; 
+    max-height: 360px;
     overflow-y: auto;
   }
+
   .user-item {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between; 
+    justify-content: space-between;
     transition: transform 0.3s ease;
   }
+
   .user-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
   }
+
   .user-profile {
     display: flex;
     align-items: center;
     gap: 10px;
   }
+
   .user-profile img {
     width: 40px;
     height: 40px;
     object-fit: cover;
     border-radius: 50%;
   }
+
   .user-profile .username {
     font-size: 1rem;
     color: #fff;
     margin: 0;
   }
+
   .follow-btn {
     min-width: 80px;
   }
 
   .btn-follow {
-    background-color: #0d6efd; /* Blue */
+    background-color: #0d6efd;
+    /* Blue */
     border: none;
     color: white;
   }
+
   .btn-followed {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
+    /* Red */
     border: none;
     color: white;
   }
@@ -284,18 +302,21 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
     z-index: 9999;
     justify-content: center;
     align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
   }
+
   .modal-overlay.show {
     display: flex;
     opacity: 1;
   }
-  .follower-list-modal, .following-list-modal {
+
+  .follower-list-modal,
+  .following-list-modal {
     background: #222;
     width: 80%;
     max-width: 600px;
@@ -308,10 +329,17 @@
     flex-direction: column;
     gap: 1rem;
   }
+
   @keyframes slideDown {
-    from { transform: translateY(-50px); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(-50px);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
+
   .close-modal-btn {
     align-self: flex-end;
     background: #666;
@@ -322,14 +350,17 @@
     cursor: pointer;
     margin-bottom: 1rem;
   }
+
   .close-modal-btn:hover {
     background: #888;
   }
+
   .modal-title {
     font-size: 1.3rem;
     margin-bottom: 0.5rem;
     text-align: center;
   }
+
   .modal-list {
     max-height: 300px;
     overflow-y: auto;
@@ -337,6 +368,7 @@
     border-radius: 4px;
     padding: 0.5rem;
   }
+
   .modal-list .user-line {
     display: flex;
     align-items: center;
@@ -346,24 +378,26 @@
     background: #333;
     border-radius: 4px;
   }
+
   .modal-list .user-line:hover {
     background: #444;
   }
+
   .modal-list .user-line img {
     width: 30px;
     height: 30px;
     object-fit: cover;
     border-radius: 50%;
   }
+
   .user-profile-image {
     cursor: pointer;
     transition: transform 0.3s ease;
-}
+  }
 
-.user-profile-image:hover {
+  .user-profile-image:hover {
     transform: scale(1.1);
-}
-
+  }
 </style>
 
 <!-- Main Wrapper -->
@@ -372,11 +406,10 @@
   <div class="profile-container">
     <!-- Profile Image -->
     <div class="profile-image">
-      <img 
-        src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}" 
+      <img
+        src="{{ $user->profile_image ?? 'https://via.placeholder.com/200' }}"
         alt="Profile Image Not Found"
-        onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
-      />
+        onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';" />
     </div>
 
     <!-- User Info -->
@@ -385,11 +418,10 @@
         <div class="username">
           {{ $user->name ?? 'Username' }}
         </div>
-        <button 
-          class="btn btn-outline-light btn-sm" 
-          data-bs-toggle="modal" 
-          data-bs-target="#editProfileModal"
-        >
+        <button
+          class="btn btn-outline-light btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#editProfileModal">
           Edit Profile
         </button>
       </div>
@@ -424,13 +456,12 @@
     <!-- Search Bar (Optional AJAX Later) -->
     <div class="search-bar">
       <label for="searchUser" class="form-label">Search Users</label>
-      <input 
-        type="text" 
-        class="form-control" 
-        id="searchUser" 
+      <input
+        type="text"
+        class="form-control"
+        id="searchUser"
         placeholder="Type to search..."
-        autocomplete="off"
-      >
+        autocomplete="off">
     </div>
 
     <!-- Filter: All, Followed, Unfollowed -->
@@ -446,36 +477,34 @@
     <!-- The user-list container (same as before, but we'll re-render it) -->
     <div class="user-list" id="userList">
       @foreach($otherUsers as $other)
-        @php
-          $isFollowed = DB::table('user_followers')
-              ->where('user_id', $other->id)
-              ->where('follower_id', auth()->id())
-              ->exists();
-        @endphp
+      @php
+      $isFollowed = DB::table('user_followers')
+      ->where('user_id', $other->id)
+      ->where('follower_id', auth()->id())
+      ->exists();
+      @endphp
 
-        <div class="user-item">
-          <div class="user-profile">
+      <div class="user-item">
+        <div class="user-profile">
           <img
-    src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}"
-    alt="User Pic"
-    onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
-    class="user-profile-image"
-    data-bs-toggle="modal"
-    data-bs-target="#userDetailModal"
-    data-user-id="{{ $other->id }}"
->
-            <p class="username mb-0">{{ $other->name }}</p>
-          </div>
-
-          <button 
-            class="btn btn-sm follow-btn 
-              {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
-            data-user-id="{{ $other->id }}"
-            data-followed="{{ $isFollowed ? 'true' : 'false' }}"
-          >
-            {{ $isFollowed ? 'Followed' : 'Follow' }}
-          </button>
+            src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}"
+            alt="User Pic"
+            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
+            class="user-profile-image"
+            data-bs-toggle="modal"
+            data-bs-target="#userDetailModal"
+            data-user-id="{{ $other->id }}">
+          <p class="username mb-0">{{ $other->name }}</p>
         </div>
+
+        <button
+          class="btn btn-sm follow-btn 
+              {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
+          data-user-id="{{ $other->id }}"
+          data-followed="{{ $isFollowed ? 'true' : 'false' }}">
+          {{ $isFollowed ? 'Followed' : 'Follow' }}
+        </button>
+      </div>
       @endforeach
     </div>
   </div>
@@ -519,13 +548,12 @@
 </div>
 
 <!-- Modal Edit Profile -->
-<div 
-  class="modal fade" 
-  id="editProfileModal" 
-  tabindex="-1" 
-  aria-labelledby="editProfileModalLabel" 
-  aria-hidden="true"
->
+<div
+  class="modal fade"
+  id="editProfileModal"
+  tabindex="-1"
+  aria-labelledby="editProfileModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog">
     <form action="{{ route('profile.update') }}" method="POST">
       @csrf
@@ -535,41 +563,38 @@
           <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
+
         <!-- Modal Body -->
         <div class="modal-body">
           <div class="mb-3">
             <label for="name" class="form-label">Username</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="name" 
-              name="name" 
-              value="{{ old('name', $user->name) }}" 
-              required
-            />
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              value="{{ old('name', $user->name) }}"
+              required />
           </div>
 
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea 
-              class="form-control" 
-              id="description" 
-              name="description" 
-              rows="3"
-            >{{ old('description', $user->description) }}</textarea>
+            <textarea
+              class="form-control"
+              id="description"
+              name="description"
+              rows="3">{{ old('description', $user->description) }}</textarea>
           </div>
 
           <div class="mb-3">
             <label for="profile_image" class="form-label">Profile Image URL</label>
-            <input 
-              type="url" 
-              class="form-control" 
-              id="profile_image" 
-              name="profile_image" 
+            <input
+              type="url"
+              class="form-control"
+              id="profile_image"
+              name="profile_image"
               value="{{ old('profile_image', $user->profile_image) }}"
-              placeholder="https://example.com/image.jpg"
-            />
+              placeholder="https://example.com/image.jpg" />
           </div>
         </div>
 
@@ -584,48 +609,48 @@
 </div>
 
 <!-- Bootstrap + JS -->
-<script 
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
   crossorigin="anonymous">
 </script>
 
 <script>
   //opening details
-  document.addEventListener('DOMContentLoaded', function () {
-  const modal = document.getElementById('userDetailModal');
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('userDetailModal');
 
-  modal.addEventListener('show.bs.modal', function (event) {
-    const triggerElement = event.relatedTarget; // The element that triggered the modal
-    const userId = triggerElement.getAttribute('data-user-id');
+    modal.addEventListener('show.bs.modal', function(event) {
+      const triggerElement = event.relatedTarget; // The element that triggered the modal
+      const userId = triggerElement.getAttribute('data-user-id');
 
-    // Check if userId is being sent
-    console.log("User ID:", userId);
+      // Check if userId is being sent
+      console.log("User ID:", userId);
 
-    // Make an AJAX request to fetch user details
-    fetch(`/user-details/${userId}`)
-      .then(response => {
-        console.log("Response Status:", response.status);
-        return response.json();
-      })
-      .then(data => {
-        console.log("Data Received:", data);
+      // Make an AJAX request to fetch user details
+      fetch(`/user-details/${userId}`)
+        .then(response => {
+          console.log("Response Status:", response.status);
+          return response.json();
+        })
+        .then(data => {
+          console.log("Data Received:", data);
 
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
 
-        // Populate modal fields with user data
-        document.getElementById('modalProfileImage').src = data.profile_image || 'https://via.placeholder.com/100';
-        document.getElementById('modalUsername').textContent = data.name || 'Unknown';
-        document.getElementById('modalDescription').textContent = data.description || 'No description available.';
-      })
-      .catch(error => {
-        console.error('Error fetching user details:', error);
-      });
+          // Populate modal fields with user data
+          document.getElementById('modalProfileImage').src = data.profile_image || 'https://via.placeholder.com/100';
+          document.getElementById('modalUsername').textContent = data.name || 'Unknown';
+          document.getElementById('modalDescription').textContent = data.description || 'No description available.';
+        })
+        .catch(error => {
+          console.error('Error fetching user details:', error);
+        });
+    });
   });
-});
 
 
   // Fade in the profile container
@@ -670,71 +695,71 @@
   // AJAX to get followers
   function fetchFollowers() {
     fetch('/get-followers', {
-      method: 'GET',
-      headers: {
-        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        'Accept': 'application/json'
-      }
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Failed to load followers');
-      return res.json();
-    })
-    .then(data => {
-      // data => array of user objects
-      followersListEl.innerHTML = '';
-      if (data.length > 0) {
-        data.forEach(u => {
-          const line = document.createElement('div');
-          line.classList.add('user-line');
-          line.innerHTML = `
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load followers');
+        return res.json();
+      })
+      .then(data => {
+        // data => array of user objects
+        followersListEl.innerHTML = '';
+        if (data.length > 0) {
+          data.forEach(u => {
+            const line = document.createElement('div');
+            line.classList.add('user-line');
+            line.innerHTML = `
             <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic"
             onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
             <span>${u.name}</span>
           `;
-          followersListEl.appendChild(line);
-        });
-      } else {
-        followersListEl.innerHTML = '<p style="text-align:center; color:#aaa;">No followers yet.</p>';
-      }
-    })
-    .catch(err => console.error(err));
+            followersListEl.appendChild(line);
+          });
+        } else {
+          followersListEl.innerHTML = '<p style="text-align:center; color:#aaa;">No followers yet.</p>';
+        }
+      })
+      .catch(err => console.error(err));
   }
 
   // AJAX to get following
   function fetchFollowing() {
     fetch('/get-following', {
-      method: 'GET',
-      headers: {
-        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        'Accept': 'application/json'
-      }
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Failed to load following');
-      return res.json();
-    })
-    .then(data => {
-      followingListEl.innerHTML = '';
-      if (data.length > 0) {
-        data.forEach(u => {
-          const line = document.createElement('div');
-          line.classList.add('user-line');
-          line.innerHTML = `
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load following');
+        return res.json();
+      })
+      .then(data => {
+        followingListEl.innerHTML = '';
+        if (data.length > 0) {
+          data.forEach(u => {
+            const line = document.createElement('div');
+            line.classList.add('user-line');
+            line.innerHTML = `
             <img src="${u.profile_image ?? 'https://via.placeholder.com/40'}" alt="User Pic"
             onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';">
             <span>${u.name}</span>
           `;
-          followingListEl.appendChild(line);
-        });
-      } else {
-        followingListEl.innerHTML = '<p style="text-align:center; color:#aaa;">You are not following anyone yet.</p>';
-      }
-    })
-    .catch(err => console.error(err));
+            followingListEl.appendChild(line);
+          });
+        } else {
+          followingListEl.innerHTML = '<p style="text-align:center; color:#aaa;">You are not following anyone yet.</p>';
+        }
+      })
+      .catch(err => console.error(err));
   }
 
-  
+
 
   // AJAX Follow/Unfollow
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -744,7 +769,7 @@
     btn.addEventListener('click', async function(e) {
       e.preventDefault();
       const userId = this.dataset.userId;
-      const followed = this.dataset.followed === 'true'; 
+      const followed = this.dataset.followed === 'true';
       // If followed == true -> UNFOLLOW
       // If false -> FOLLOW
 
@@ -775,27 +800,27 @@
           return;
         }
 
-        const data = await response.json(); 
+        const data = await response.json();
         // data.followed should be boolean from controller
 
         var followedNum = document.getElementById('folNum');
         // Toggle button
-       if (data.followed) {
-  // Means now followed
-  this.textContent = 'Followed';
-  this.classList.remove('btn-follow');
-  this.classList.add('btn-followed');
-  this.dataset.followed = 'true';
+        if (data.followed) {
+          // Means now followed
+          this.textContent = 'Followed';
+          this.classList.remove('btn-follow');
+          this.classList.add('btn-followed');
+          this.dataset.followed = 'true';
 
-  
-} else {
-  // Means now unfollowed
-  this.textContent = 'Follow';
-  this.classList.remove('btn-followed');
-  this.classList.add('btn-follow');
-  this.dataset.followed = 'false';
 
-}
+        } else {
+          // Means now unfollowed
+          this.textContent = 'Follow';
+          this.classList.remove('btn-followed');
+          this.classList.add('btn-follow');
+          this.dataset.followed = 'false';
+
+        }
 
       } catch (error) {
         console.error('AJAX error:', error);
@@ -810,32 +835,32 @@
   let searchTimer = null;
 
   function doSearch() {
-    const query = searchInput.value.trim();     // the typed text
-    const filter = filterSelect.value;          // all | followed | unfollowed
+    const query = searchInput.value.trim(); // the typed text
+    const filter = filterSelect.value; // all | followed | unfollowed
 
     // Construct URL: /search-users?q=...&filter=...
     let url = `/search-users?q=${encodeURIComponent(query)}&filter=${encodeURIComponent(filter)}`;
 
     fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Search error: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      // data => array of user objects, each with { id, name, profile_image, is_followed }
-      renderUserList(data);
-    })
-    .catch(err => {
-      console.error('Search fetch error:', err);
-    });
+        method: 'GET',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Search error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // data => array of user objects, each with { id, name, profile_image, is_followed }
+        renderUserList(data);
+      })
+      .catch(err => {
+        console.error('Search fetch error:', err);
+      });
   }
 
   // 2) On keyup in the searchInput, we do a small debounce
@@ -905,74 +930,74 @@
 
   // 5) Move your existing follow/unfollow logic into a function
   async function followUnfollowHandler(e) {
-  e.preventDefault();
-  const userId = this.dataset.userId;
-  const followed = (this.dataset.followed === 'true');
+    e.preventDefault();
+    const userId = this.dataset.userId;
+    const followed = (this.dataset.followed === 'true');
 
-  let url, method;
-  if (followed) {
-    // Unfollow
-    url = `/unfollow/${userId}`;
-    method = 'DELETE';
-  } else {
-    // Follow
-    url = `/follow/${userId}`;
-    method = 'POST';
-  }
-
-  try {
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      console.error('Error in follow/unfollow:', response.status);
-      return;
-    }
-
-    const data = await response.json();
-    // data.followed => true if now followed, false if now unfollowed
-
-    // Toggle button text & style
-    if (data.followed) {
-      this.textContent = 'Followed';
-      this.classList.remove('btn-follow');
-      this.classList.add('btn-followed');
-      this.dataset.followed = 'true';
-      
-      // Increment your 'Following' count
-      const followedNum = document.getElementById('folNum');
-      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-      followedNum.innerHTML = currentVal + 1;
-
+    let url, method;
+    if (followed) {
+      // Unfollow
+      url = `/unfollow/${userId}`;
+      method = 'DELETE';
     } else {
-      this.textContent = 'Follow';
-      this.classList.remove('btn-followed');
-      this.classList.add('btn-follow');
-      this.dataset.followed = 'false';
-
-      // Decrement your 'Following' count
-      const followedNum = document.getElementById('folNum');
-      let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
-      if (currentVal > 0) {
-        followedNum.innerHTML = currentVal - 1;
-      }
+      // Follow
+      url = `/follow/${userId}`;
+      method = 'POST';
     }
 
-    // If you're on "followed" or "unfollowed" filter, re-run the search 
-    // so the user disappears or appears accordingly.
-    // If you want that behavior, just do:
-    doSearch();
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
 
-  } catch (error) {
-    console.error('AJAX error:', error);
+      if (!response.ok) {
+        console.error('Error in follow/unfollow:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+      // data.followed => true if now followed, false if now unfollowed
+
+      // Toggle button text & style
+      if (data.followed) {
+        this.textContent = 'Followed';
+        this.classList.remove('btn-follow');
+        this.classList.add('btn-followed');
+        this.dataset.followed = 'true';
+
+        // Increment your 'Following' count
+        const followedNum = document.getElementById('folNum');
+        let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+        followedNum.innerHTML = currentVal + 1;
+
+      } else {
+        this.textContent = 'Follow';
+        this.classList.remove('btn-followed');
+        this.classList.add('btn-follow');
+        this.dataset.followed = 'false';
+
+        // Decrement your 'Following' count
+        const followedNum = document.getElementById('folNum');
+        let currentVal = parseInt(followedNum.innerHTML, 10) || 0;
+        if (currentVal > 0) {
+          followedNum.innerHTML = currentVal - 1;
+        }
+      }
+
+      // If you're on "followed" or "unfollowed" filter, re-run the search 
+      // so the user disappears or appears accordingly.
+      // If you want that behavior, just do:
+      doSearch();
+
+    } catch (error) {
+      console.error('AJAX error:', error);
+    }
   }
-}
 
 
   // 6) Attach the existing followUnfollowHandler to the initial buttons
@@ -983,4 +1008,4 @@
   // 7) (Optional) On page load, we might do an initial search to show "all" if needed
   // doSearch(); // or only do it if user starts typing or changes the filter
 </script>
-@endsection 
+@endsection
