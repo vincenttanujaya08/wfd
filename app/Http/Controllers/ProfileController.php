@@ -17,30 +17,33 @@ class ProfileController extends Controller
         // Get the authenticated user
         $user = Auth::user();
 
-        // Total posts by the user (assuming a Post model with user_id column)
+        // Total posts by the user
         $totalPosts = DB::table('posts')->where('user_id', $user->id)->count();
 
-        // Total followers
+        // Total followers & following
         $totalFollowers = DB::table('user_followers')->where('user_id', $user->id)->count();
-
-        // Total following
         $totalFollowing = DB::table('user_followers')->where('follower_id', $user->id)->count();
 
-        // --- NEW CODE: Query for "all other users" ---
-        // Option A: Using Query Builder
-        // $otherUsers = DB::table('users')
-        //     ->where('id', '!=', $user->id)
-        //     ->get();
+        // Ambil user id yang sudah difollow
+        $followedUserIds = DB::table('user_followers')
+            ->where('follower_id', $user->id)
+            ->pluck('user_id')
+            ->toArray();
 
-        // Option B: Using Eloquent (recommended, if your 'User' model is set up):
+        // Ambil user lain
         $otherUsers = User::where('id', '!=', $user->id)->get();
 
+        // Tambahkan status is_followed pada tiap user
+        foreach ($otherUsers as $other) {
+            $other->is_followed = in_array($other->id, $followedUserIds);
+        }
+
         return view('profile', [
-            'user'           => $user,
-            'totalPosts'     => $totalPosts,
-            'totalFollowers' => $totalFollowers,
-            'totalFollowing' => $totalFollowing,
-            'otherUsers'     => $otherUsers, // Pass to Blade
+            'user'            => $user,
+            'totalPosts'      => $totalPosts,
+            'totalFollowers'  => $totalFollowers,
+            'totalFollowing'  => $totalFollowing,
+            'otherUsers'      => $otherUsers, // Sudah include is_followed
         ]);
     }
 
@@ -77,48 +80,47 @@ class ProfileController extends Controller
         }
     }
     public function searchUsers(Request $request)
-{
-    $query = $request->input('q', '');
-    $filter = $request->input('filter', 'all'); 
-    $authId = auth()->id();
+    {
+        $query = $request->input('q', '');
+        $filter = $request->input('filter', 'all');
+        $authId = auth()->id();
 
-    // Base query: all users except self (maybe?)
-    $usersQuery = User::where('id', '!=', $authId);
+        // Base query: all users except self (maybe?)
+        $usersQuery = User::where('id', '!=', $authId);
 
-    // If $query is not empty, filter by name
-    if (!empty($query)) {
-       $usersQuery->where('name', 'like', '%'.$query.'%');
-    }
-
-    $allUsers = $usersQuery->get();
-
-    // Check if followed (by me)
-    // We'll attach 'is_followed' => bool
-    // Also filter out if needed
-    $results = [];
-    foreach ($allUsers as $u) {
-        $isFollowed = DB::table('user_followers')
-            ->where('user_id', $u->id)
-            ->where('follower_id', $authId)
-            ->exists();
-
-        // Based on $filter, decide if we skip
-        if ($filter === 'followed' && !$isFollowed) {
-            continue;
-        } 
-        if ($filter === 'unfollowed' && $isFollowed) {
-            continue;
+        // If $query is not empty, filter by name
+        if (!empty($query)) {
+            $usersQuery->where('name', 'like', '%' . $query . '%');
         }
 
-        $results[] = [
-            'id' => $u->id,
-            'name' => $u->name,
-            'profile_image' => $u->profile_image,
-            'is_followed' => $isFollowed,
-        ];
+        $allUsers = $usersQuery->get();
+
+        // Check if followed (by me)
+        // We'll attach 'is_followed' => bool
+        // Also filter out if needed
+        $results = [];
+        foreach ($allUsers as $u) {
+            $isFollowed = DB::table('user_followers')
+                ->where('user_id', $u->id)
+                ->where('follower_id', $authId)
+                ->exists();
+
+            // Based on $filter, decide if we skip
+            if ($filter === 'followed' && !$isFollowed) {
+                continue;
+            }
+            if ($filter === 'unfollowed' && $isFollowed) {
+                continue;
+            }
+
+            $results[] = [
+                'id' => $u->id,
+                'name' => $u->name,
+                'profile_image' => $u->profile_image,
+                'is_followed' => $isFollowed,
+            ];
+        }
+
+        return response()->json($results, 200);
     }
-
-    return response()->json($results, 200);
-}
-
 }

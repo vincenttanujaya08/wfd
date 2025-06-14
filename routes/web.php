@@ -15,7 +15,8 @@ use App\Http\Controllers\{
     NotificationController,
     FollowController,
     ProfileController,
-    UserController
+    UserController,
+    AdminController
 };
 use App\Models\User;
 
@@ -25,8 +26,17 @@ use App\Models\User;
 |--------------------------------------------------------------------------
 */
 
-// Home Route (no authentication required)
-Route::view('/', 'home')->name('home')->middleware('guest');
+Route::get('/', function () {
+    if (Auth::check()) {
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('explore'); // atau 'load'
+    }
+    return view('home');
+});
+
 Route::view('/home', 'home')->middleware('guest');
 Route::view('/load', 'load')->name('load');
 
@@ -129,4 +139,10 @@ Route::get('/db-test', function () {
     } catch (\Exception $e) {
         return 'Database connection failed: ' . $e->getMessage();
     }
+});
+
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    // Tambahkan route admin lainnya di sini jika perlu
 });

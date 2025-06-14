@@ -11,43 +11,53 @@ use App\Models\User;
 
 class LoginController extends Controller
 {
-   
-   
-public function showLoginForm()
-{
-    // Check if the user is already logged in
-    if (Auth::check()) {
-        // Redirect the logged-in user to /app
-        return redirect()->route('app');
+
+
+    public function showLoginForm()
+    {
+        // Check if the user is already logged in
+        if (Auth::check()) {
+            // Redirect the logged-in user to /app
+            return redirect()->route('app');
+        }
+
+        // Show the login form if the user is not logged in
+        return view('login');
     }
 
-    // Show the login form if the user is not logged in
-    return view('login');
-}
 
-  
     public function login(Request $request)
     {
-        // Validate the login form data
+        // Validasi input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        // Attempt to log the user in with the given credentials
+        // Coba login
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
-            // Redirect user to intended page after successful login
-            return redirect()->intended(route('load')); // replace with the route you want to redirect to
+            // Ambil user yang login
+            $user = Auth::user();
+
+            // Cek rolenya
+            if ($user->role === 'admin') {
+                // Redirect ke halaman admin
+                return redirect()->route('admin.dashboard');
+            } else {
+                // Redirect ke halaman user biasa
+                return redirect()->intended(route('load'));
+            }
         }
 
-        // If authentication fails, redirect back with error message
+        // Jika gagal
         return back()->withErrors([
             'email' => 'The provided credentials are incorrect.',
         ])->withInput($request->only('email', 'remember'));
     }
 
-    
- 
+
+
+
     public function logout()
     {
         Auth::logout(); // Log the user out

@@ -477,36 +477,32 @@
     <!-- The user-list container (same as before, but we'll re-render it) -->
     <div class="user-list" id="userList">
       @foreach($otherUsers as $other)
-      @php
-      $isFollowed = DB::table('user_followers')
-      ->where('user_id', $other->id)
-      ->where('follower_id', auth()->id())
-      ->exists();
-      @endphp
-
       <div class="user-item">
         <div class="user-profile">
           <img
-            src="{{ $other->profile_image ?? 'https://via.placeholder.com/40' }}"
+            src="{{ $other->profile_image ?? asset('images/default_profile.jpeg') }}"
+            loading="lazy"
             alt="User Pic"
-            onerror="this.onerror=null; this.src='https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-1-scaled.png'; this.alt='Profile Image Not Found'; this.style.border='2px solid red'; this.title='Profile Image Not Found';"
             class="user-profile-image"
             data-bs-toggle="modal"
             data-bs-target="#userDetailModal"
             data-user-id="{{ $other->id }}">
+
           <p class="username mb-0">{{ $other->name }}</p>
         </div>
 
         <button
           class="btn btn-sm follow-btn 
-              {{ $isFollowed ? 'btn-followed' : 'btn-follow'}}"
+        {{ $other->is_followed ? 'btn-followed' : 'btn-follow'}}"
           data-user-id="{{ $other->id }}"
-          data-followed="{{ $isFollowed ? 'true' : 'false' }}">
-          {{ $isFollowed ? 'Followed' : 'Follow' }}
+          data-followed="{{ $other->is_followed ? 'true' : 'false' }}">
+          {{ $other->is_followed ? 'Followed' : 'Follow' }}
         </button>
       </div>
       @endforeach
     </div>
+
+
   </div>
 </div>
 
