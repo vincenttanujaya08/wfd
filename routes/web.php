@@ -16,7 +16,8 @@ use App\Http\Controllers\{
     FollowController,
     ProfileController,
     UserController,
-    AdminController
+    AdminController,
+    ReportController
 };
 use App\Models\User;
 
@@ -87,6 +88,11 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/comments/{id}/hide', [PostController::class, 'hideComment'])->name('comments.hide');
     Route::get('/posts/{id}/hidden-comments', [PostController::class, 'getHiddenComments'])->name('posts.hidden-comments');
     Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])->name('comments.unhide');
+
+    //Report
+    Route::get('/report', [ReportController::class, 'show'])->name('report.show');
+    Route::get('/report/search-users', [ReportController::class, 'searchUsers']);
+    Route::post('/report/send', [ReportController::class, 'sendReport']);
 });
 
 // Guest (not logged in) routes for Login & Signup

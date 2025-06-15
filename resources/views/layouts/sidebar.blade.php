@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Lineicons CDN -->
-    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+    <link href="https://cdn.lineicons.com/5.0/lineicons.css" rel="stylesheet">
 
     <title>Sidebar Example</title>
     <style>
@@ -18,11 +19,11 @@
             margin: 0;
             font-family: sans-serif;
             background: #111;
-            color: #ccc; 
+            color: #ccc;
         }
 
         .main-content {
-            margin-left: 0; 
+            margin-left: 0;
             padding: 1rem;
         }
 
@@ -32,8 +33,10 @@
             top: 0;
             left: 0;
             height: 100vh;
-            width: 70px; /* Width when collapsed */
-            background: #1f1f1f; /* Dark background */
+            width: 70px;
+            /* Width when collapsed */
+            background: #1f1f1f;
+            /* Dark background */
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -43,7 +46,8 @@
         }
 
         #sidebar.expanded {
-            width: 260px; /* Width when expanded */
+            width: 260px;
+            /* Width when expanded */
         }
 
         .sidebar-top {
@@ -90,7 +94,8 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            position: relative; /* For badge positioning */
+            position: relative;
+            /* For badge positioning */
         }
 
         .nav-item {
@@ -105,7 +110,8 @@
             border: none;
             font: inherit;
             text-align: left;
-            position: relative; /* For badge positioning */
+            position: relative;
+            /* For badge positioning */
         }
 
         .nav-item:hover {
@@ -132,7 +138,8 @@
 
         /* Notification Badge */
         .notification-badge {
-            position: absolute; /* Absolute positioning relative to .nav-item */
+            position: absolute;
+            /* Absolute positioning relative to .nav-item */
             background-color: red;
             color: white;
             border-radius: 50%;
@@ -143,7 +150,8 @@
             justify-content: center;
             width: 16px;
             height: 16px;
-            z-index: 10; /* Ensure it appears above other elements */
+            z-index: 10;
+            /* Ensure it appears above other elements */
             top: -4px;
             right: -4px;
         }
@@ -170,8 +178,11 @@
         body.sidebar-open .main-content::before {
             content: "";
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 5000;
         }
 
@@ -182,8 +193,8 @@
         }
 
         .logout-form button.nav-item {
-            background: none; 
-            border: none; 
+            background: none;
+            border: none;
             padding: 1rem;
             cursor: pointer;
             display: flex;
@@ -195,22 +206,29 @@
         .logout-form button.nav-item:hover {
             background: #333;
         }
+
         .notification-badge {
-    position: absolute; /* Absolute positioning relative to .nav-item */
-    background-color: red !important; /* Ensure it's visible */
-    color: white;
-    border-radius: 50%;
-    font-size: 0.8rem;
-    font-weight: bold;
-    display: flex !important; /* Force display */
-    align-items: center;
-    justify-content: center;
-    width: 20px; /* Increase size for debugging */
-    height: 20px; /* Increase size for debugging */
-    top: -4px;
-    right: -4px;
-    z-index: 10; /* Ensure it appears above other elements */
-}
+            position: absolute;
+            /* Absolute positioning relative to .nav-item */
+            background-color: red !important;
+            /* Ensure it's visible */
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: flex !important;
+            /* Force display */
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            /* Increase size for debugging */
+            height: 20px;
+            /* Increase size for debugging */
+            top: -4px;
+            right: -4px;
+            z-index: 10;
+            /* Ensure it appears above other elements */
+        }
 
 
         /* Responsive Adjustments (Optional) */
@@ -231,14 +249,14 @@
                 height: 16px;
             }
         }
-
     </style>
 </head>
+
 <body>
 
     <div id="sidebar">
         <div class="sidebar-top">
-            <i class="lni lni-menu menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"></i>
+            <i class="lni lni-menu-cheesburger menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"></i>
             <span class="brand">TODDIT</span>
         </div>
 
@@ -246,31 +264,37 @@
             <!-- Existing navigation items -->
 
             <a href="{{ route('explore') }}" class="nav-item {{ Request::is('explore') ? 'active' : '' }}" aria-label="Explore">
-                <i class="lni lni-compass" aria-hidden="true"></i>
+                <i class="lni lni-search-1"></i>
                 <span class="nav-text">EXPLORE</span>
             </a>
 
             <a href="{{ route('upload') }}" class="nav-item {{ Request::is('upload') ? 'active' : '' }}" aria-label="Upload">
-                <i class="lni lni-upload" aria-hidden="true"></i>
+                <i class="lni lni-upload-1"></i>
                 <span class="nav-text">UPLOAD</span>
             </a>
 
             <a href="{{ route('homee') }}" class="nav-item {{ Request::is('home') ? 'active' : '' }}" aria-label="Home">
-                <i class="lni lni-home" aria-hidden="true"></i>
+                <i class="lni lni-home-2"></i>
                 <span class="nav-text">HOME</span>
             </a>
 
             <!-- Notification Menu Item -->
             <a href="{{ route('notification') }}" class="nav-item {{ Request::is('notifications') ? 'active' : '' }}" aria-label="Notifications">
-    <i class="lni lni-alarm" aria-hidden="true"></i>
-    <span class="nav-text">NOTIFICATIONS</span>
-    <span class="notification-badge" style="display: none;" aria-label="Unread notifications count">0</span>
-    
-</a>
-<a href="{{ route('profile.show') }}" class="nav-item {{ Request::is('profile') ? 'active' : '' }}" aria-label="Profile">
-            <i class="lni lni-user" aria-hidden="true"></i>
-            <span class="nav-text">PROFILE</span>
-        </a>
+                <i class="lni lni-bell-1" aria-hidden="true"></i>
+                <span class="nav-text">NOTIFICATIONS</span>
+                <span class="notification-badge" style="display: none;" aria-label="Unread notifications count">0</span>
+
+            </a>
+            <a href="{{ route('profile.show') }}" class="nav-item {{ Request::is('profile') ? 'active' : '' }}" aria-label="Profile">
+                <i class="lni lni-user-4"></i>
+                <span class="nav-text">PROFILE</span>
+            </a>
+
+
+            <a href="{{ route('report.show') }}" class="nav-item {{ Request::is('report') ? 'active' : '' }}" aria-label="Report">
+                <i class="lni lni-board-writing-3" aria-hidden="true"></i>
+                <span class="nav-text">REPORT</span>
+            </a>
 
 
         </div>
@@ -295,32 +319,32 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
-    const badge = document.querySelector('.notification-badge');
+            const badge = document.querySelector('.notification-badge');
 
-    // Fetch jumlah notifikasi yang belum dibaca
-    fetch('/notifications/unread-count', {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            const unreadCount = data.unread_notifications_count;
+            // Fetch jumlah notifikasi yang belum dibaca
+            fetch('/notifications/unread-count', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const unreadCount = data.unread_notifications_count;
 
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'flex'; // Tampilkan badge jika ada notifikasi
-            } else {
-                badge.style.display = 'none'; // Sembunyikan badge jika tidak ada notifikasi
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching unread notifications count:', error);
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'flex'; // Tampilkan badge jika ada notifikasi
+                    } else {
+                        badge.style.display = 'none'; // Sembunyikan badge jika tidak ada notifikasi
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching unread notifications count:', error);
+                });
         });
-});
-
     </script>
 
 </body>
+
 </html>

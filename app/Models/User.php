@@ -21,8 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'profile_image', 
-        'description',   
+        'profile_image',
+        'description',
     ];
 
     /**
@@ -80,5 +80,40 @@ class User extends Authenticatable
             'user_id',
             'follower_id'
         );
+    }
+
+    public function reportsMade()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    public function reportsReceived()
+    {
+        return $this->hasMany(Report::class, 'reported_user_id');
+    }
+
+    public function warnings()
+    {
+        return $this->hasMany(Warning::class, 'user_id');
+    }
+
+    public function warningsGiven()
+    {
+        return $this->hasMany(Warning::class, 'admin_id');
+    }
+
+    public function bans()
+    {
+        return $this->hasMany(Ban::class, 'user_id');
+    }
+
+    public function bansGiven()
+    {
+        return $this->hasMany(Ban::class, 'admin_id');
+    }
+
+    public function appeals()
+    {
+        return $this->hasMany(Appeal::class, 'user_id');
     }
 }
