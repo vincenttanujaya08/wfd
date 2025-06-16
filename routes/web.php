@@ -1,5 +1,8 @@
 <?php
-
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\BanController;
+use App\Http\Controllers\AppealController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +33,7 @@ use App\Models\User;
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
-        if ($user->role === 'admin') {
+        if ($user->role === '1') {
             return redirect()->route('admin.dashboard');
         }
         return redirect()->route('explore'); // atau 'load'
@@ -90,9 +93,21 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])->name('comments.unhide');
 
     //Report
-    Route::get('/report', [ReportController::class, 'show'])->name('report.show');
-    Route::get('/report/search-users', [ReportController::class, 'searchUsers']);
-    Route::post('/report/send', [ReportController::class, 'sendReport']);
+//Report (front-end user reporting)
+    Route::middleware('auth')->group(function () {
+        // Tampilkan halaman report + search form
+        Route::get('/report', [ReportController::class, 'show'])
+            ->name('report.show');
+
+        // AJAX live-search users (paginate 5)
+        Route::get('/report/search-users', [ReportController::class, 'searchUsers'])
+            ->name('report.searchUsers');
+
+        // AJAX kirim report
+        Route::post('/report/send', [ReportController::class, 'sendReport'])
+            ->name('report.sendReport');
+    });
+
 });
 
 // Guest (not logged in) routes for Login & Signup
@@ -129,9 +144,9 @@ Route::get('/user-details/{id}', function ($id) {
     $user = User::find($id);
     if ($user) {
         return response()->json([
-            'name'          => $user->name,
+            'name' => $user->name,
             'profile_image' => $user->profile_image,
-            'description'   => $user->description,
+            'description' => $user->description,
         ]);
     }
     return response()->json(['error' => 'User not found'], 404);
@@ -151,4 +166,32 @@ Route::get('/db-test', function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     // Tambahkan route admin lainnya di sini jika perlu
+    // AdminUserController.php (User Management)
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+
+    // Reports
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])->name('admin.reports.show');
+    Route::put('/admin/reports/{report}', [AdminReportController::class, 'update'])->name('admin.reports.update');
+
+    // Bans
+    Route::get('/admin/bans', [BanController::class, 'index'])->name('admin.bans.index');
+    Route::post('/admin/bans', [BanController::class, 'store'])->name('admin.bans.store');
+    Route::put('/admin/bans/{ban}', [BanController::class, 'update'])->name('admin.bans.update');
+
+    // Appeals
+    Route::get('/admin/appeals', [AppealController::class, 'index'])->name('admin.appeals.index');
+    Route::put('/admin/appeals/{appeal}', [AppealController::class, 'update'])->name('admin.appeals.update');
+
+
+
+
+    // … routes auth, public, dll …
+
 });
+
+;

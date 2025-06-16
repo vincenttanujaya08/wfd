@@ -25,35 +25,28 @@ class LoginController extends Controller
         return view('login');
     }
 
+public function login(Request $request)
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-    public function login(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+   if (Auth::attempt($request->only('email','password'), $request->remember)) {
+    $user = Auth::user();
 
-        // Coba login
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
-            // Ambil user yang login
-            $user = Auth::user();
-
-            // Cek rolenya
-            if ($user->role === 'admin') {
-                // Redirect ke halaman admin
-                return redirect()->route('admin.dashboard');
-            } else {
-                // Redirect ke halaman user biasa
-                return redirect()->intended(route('load'));
-            }
+     if ($user->role_id === 1) {
+            // Redirect ke route admin.dashboard (URL berubah ke /admin/dashboard)
+            return redirect()->route('admin.dashboard');
         }
 
-        // Jika gagal
-        return back()->withErrors([
-            'email' => 'The provided credentials are incorrect.',
-        ])->withInput($request->only('email', 'remember'));
-    }
+    return redirect()->route('explore');
+}
+
+    return back()
+        ->withErrors(['email'=>'Credentials incorrect'])
+        ->withInput($request->only('email','remember'));
+}
 
 
 
