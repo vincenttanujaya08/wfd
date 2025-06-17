@@ -164,28 +164,46 @@ Route::get('/db-test', function () {
 
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    // Tambahkan route admin lainnya di sini jika perlu
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
+
     // AdminUserController.php (User Management)
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    Route::get('/admin/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
-    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
-    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
-    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+    // AJAX search endpoint (5 per page)
+    Route::get('/admin/dashboard/search-users', [AdminController::class, 'searchUsers'])
+        ->name('admin.dashboard.searchUsers');
+
+
+    Route::get('/admin/users/create', [AdminUserController::class, 'create'])
+        ->name('admin.users.create');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])
+        ->name('admin.users.store');
+    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])
+        ->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])
+        ->name('admin.users.update');
+
 
     // Reports
-    Route::get('/admin/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
-    Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])->name('admin.reports.show');
-    Route::put('/admin/reports/{report}', [AdminReportController::class, 'update'])->name('admin.reports.update');
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])
+        ->name('admin.reports.index');
+    Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])
+        ->name('admin.reports.show');
+    Route::put('/admin/reports/{report}', [AdminReportController::class, 'update'])
+        ->name('admin.reports.update');
 
     // Bans
-    Route::get('/admin/bans', [BanController::class, 'index'])->name('admin.bans.index');
-    Route::post('/admin/bans', [BanController::class, 'store'])->name('admin.bans.store');
-    Route::put('/admin/bans/{ban}', [BanController::class, 'update'])->name('admin.bans.update');
+    Route::get('/admin/bans', [BanController::class, 'index'])
+        ->name('admin.bans.index');
+    Route::post('/admin/bans', [BanController::class, 'store'])
+        ->name('admin.bans.store');
+    Route::put('/admin/bans/{ban}', [BanController::class, 'update'])
+        ->name('admin.bans.update');
 
     // Appeals
-    Route::get('/admin/appeals', [AppealController::class, 'index'])->name('admin.appeals.index');
-    Route::put('/admin/appeals/{appeal}', [AppealController::class, 'update'])->name('admin.appeals.update');
+    Route::get('/admin/appeals', [AppealController::class, 'index'])
+        ->name('admin.appeals.index');
+    Route::put('/admin/appeals/{appeal}', [AppealController::class, 'update'])
+        ->name('admin.appeals.update');
 
 
 

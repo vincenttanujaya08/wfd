@@ -2,62 +2,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
-    public function index(Request $request)
-    {
-        $q = $request->input('search');
-        $query = User::with(['role','reportsReceived','warnings','bans']);
-        if($q) {
-            $query->where('name','like',"%{$q}%")
-                  ->orWhere('email','like',"%{$q}%");
-        }
-        $users = $query->paginate(10);
-        return view('admin.users.index', compact('users','q'));
-    }
-
+    /**
+     * Tampilkan form pembuatan user baru
+     */
     public function create()
     {
-        $roles = Role::all();
-        return view('admin.users.create', compact('roles'));
+        return view('admin.users.create');
     }
 
+    /**
+     * Simpan user baru ke database
+     */
     public function store(Request $r)
     {
         $r->validate([
-            'name'                  => 'required',
-            'email'                 => 'required|email|unique:users',
-            'password'              => 'required|confirmed',
-            'role_id'               => 'required|exists:roles,id'
+            'name'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email',
+            'password'              => 'required|confirmed|min:6',
+            'role_id'               => 'required|in:1,2,3',
         ]);
+
         User::create([
-            'name'      => $r->name,
-            'email'     => $r->email,
-            'password'  => Hash::make($r->password),
-            'role_id'   => $r->role_id,
+            'name'     => $r->name,
+            'email'    => $r->email,
+            'password' => Hash::make($r->password),
+            'role_id'  => $r->role_id,
         ]);
-        return redirect()->route('admin.users.index')
-                         ->with('success','User/Admin berhasil ditambahkan');
+
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'User/Admin berhasil ditambahkan');
     }
 
+    /**
+     * Tampilkan form edit user
+     */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('admin.users.edit', compact('user','roles'));
+        return view('admin.users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+    /**
+     * Update data user
+     */
+    public function update(Request $req, User $user)
     {
-        $request->validate([
+        $req->validate([
             'name'    => 'required|string|max:255',
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => 'required|in:1,2,3',
         ]);
-        $user->update($request->only('name','role_id'));
-        return redirect()->route('admin.users.index')
-                         ->with('success','User berhasil diperbarui');
+
+        $user->update($req->only('name', 'role_id'));
+
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'User berhasil diperbarui');
     }
 }

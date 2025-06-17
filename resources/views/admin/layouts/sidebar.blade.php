@@ -254,61 +254,44 @@
 
 <body>
 
-    <div id="sidebar">
-        <div class="sidebar-top">
-            <i class="lni lni-menu-cheesburger menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"></i>
-            <span class="brand">TODDIT</span>
-        </div>
+ <div id="sidebar" >
+  <div class="sidebar-top">
+    <i class="lni lni-home-2 menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar"></i>
+    <span class="brand">Toddit Admin</span>
+  </div>
 
-        <div class="sidebar-nav">
-            <!-- Existing navigation items -->
+  <nav class="sidebar-nav">
+    <a href="{{ route('admin.dashboard') }}" class="nav-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}" aria-label="Dashboard">
+      <i class="lni lni-dashboard-square-1"></i>
+      <span class="nav-text">Dashboard</span>
+    </a>
 
-            <a href="{{ route('explore') }}" class="nav-item {{ Request::is('explore') ? 'active' : '' }}" aria-label="Explore">
-                <i class="lni lni-search-1"></i>
-                <span class="nav-text">EXPLORE</span>
-            </a>
+    <a href="{{ route('admin.dashboard') }}" class="nav-item {{ Request::routeIs('admin.users.*') ? 'active' : '' }}" aria-label="User Management">
+      <i class="lni lni-user-4"></i>
+      <span class="nav-text">User Management</span>
+    </a>
 
-            <a href="{{ route('upload') }}" class="nav-item {{ Request::is('upload') ? 'active' : '' }}" aria-label="Upload">
-                <i class="lni lni-upload-1"></i>
-                <span class="nav-text">UPLOAD</span>
-            </a>
+    <a href="{{ route('admin.reports.index') }}" class="nav-item {{ Request::routeIs('admin.reports.*') ? 'active' : '' }}" aria-label="Reports">
+      <i class="lni lni-book-1"></i>
+      <span class="nav-text">Reports</span>
+    </a>
 
-            <a href="{{ route('homee') }}" class="nav-item {{ Request::is('home') ? 'active' : '' }}" aria-label="Home">
-                <i class="lni lni-home-2"></i>
-                <span class="nav-text">HOME</span>
-            </a>
+    <a href="{{ route('admin.appeals.index') }}" class="nav-item {{ Request::routeIs('admin.appeals.*') ? 'active' : '' }}" aria-label="Appeals">
+      <i class="lni lni-ban-2"></i>
+      <span class="nav-text">Appeals</span>
+    </a>
+  </nav>
 
-            <!-- Notification Menu Item -->
-            <a href="{{ route('notification') }}" class="nav-item {{ Request::is('notifications') ? 'active' : '' }}" aria-label="Notifications">
-                <i class="lni lni-bell-1" aria-hidden="true"></i>
-                <span class="nav-text">NOTIFICATIONS</span>
-                <span class="notification-badge" style="display: none;" aria-label="Unread notifications count">0</span>
-
-            </a>
-            <a href="{{ route('profile.show') }}" class="nav-item {{ Request::is('profile') ? 'active' : '' }}" aria-label="Profile">
-                <i class="lni lni-user-4"></i>
-                <span class="nav-text">PROFILE</span>
-            </a>
-
-
-            <a href="{{ route('report.show') }}" class="nav-item {{ Request::is('report') ? 'active' : '' }}" aria-label="Report">
-                <i class="lni lni-board-writing-3" aria-hidden="true"></i>
-                <span class="nav-text">REPORT</span>
-            </a>
-
-
-        </div>
-
-        <div class="sidebar-footer">
-            <form class="logout-form" action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="nav-item" aria-label="Logout">
-                    <i class="lni lni-exit" aria-hidden="true"></i>
-                    <span class="nav-text">LOGOUT</span>
-                </button>
-            </form>
-        </div>
-    </div>
+  <div class="sidebar-footer">
+    <form action="{{ route('logout') }}" method="POST" class="logout-form">
+      @csrf
+      <button type="submit" class="nav-item" aria-label="Logout">
+        <i class="lni lni-exit"></i>
+        <span class="nav-text">Logout</span>
+      </button>
+    </form>
+  </div>
+</div>
 
     <script>
         function toggleSidebar() {
