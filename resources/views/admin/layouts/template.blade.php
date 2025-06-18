@@ -3,39 +3,49 @@
 <head>
   <!-- … meta, CSS lineicons … -->
   <style>
-    /* Reset & base */
-    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-    html,body{ width:100%; height:100%; overflow-x:hidden; font-family:sans-serif; }
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #111;
+            color: #ccc;
+            font-family: sans-serif;
+            overflow-x: hidden; /* Mencegah scroll horizontal */
+        }
 
-    /* Sidebar */
-    #sidebar {
-      position:fixed; top:0; left:0;
-      height:100vh; width:70px;
-      background:#1f1f1f; color:#ccc;
-      display:flex; flex-direction:column;
-      transition:width .3s; overflow:hidden; z-index:1000;
-    }
-    #sidebar.expanded { width:260px; }
+        /* Misalnya sidebar collapse width = 70px, expanded width = 260px.
+           Kita akan atur main-content agar menyesuaikan.
+        */
 
-    /* Main content bergeser otomatis */
-    .main-content {
-      margin-left: 70px;
-      width: calc(100% - 70px);
-      padding:1rem 2rem;
-      transition:margin-left .3s,width .3s;
-    }
-    body.sidebar-open .main-content {
-      margin-left: 260px;
-      width: calc(100% - 260px);
-    }
+        /* Body dengan sidebar collapse */
+        body:not(.sidebar-open) .main-content {
+            margin-left: 70px; /* Ruang untuk sidebar collapse */
+            width: calc(100% - 70px);
+        }
 
-    /* overlay dekorasi (tdk memblok klik) */
-    body.sidebar-open .main-content::before {
-      content:""; position:fixed;
-      top:0; left:0; right:0; bottom:0;
-      background:rgba(0,0,0,0.2);
-      pointer-events:none; z-index:500;
-    }
+        /* Body dengan sidebar open */
+        body.sidebar-open .main-content {
+            margin-left: 260px; /* Jika sidebar expand menjadi 260px */
+            width: calc(100% - 260px);
+        }
+
+        .main-content {
+            transition: margin-left 0.3s ease, width 0.3s ease;
+            padding: 1rem;
+            box-sizing: border-box;
+            position: relative;
+            /* Tidak perlu absolute jika layout normal */
+        }
+
+        /* Overlay efek jika sidebar expanded, jika diinginkan */
+        body.sidebar-open .main-content::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 5000;
+        }
   </style>
   @yield('head')
 </head>

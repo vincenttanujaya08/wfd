@@ -310,35 +310,8 @@
         <button id="next-page" class="btn btn-next" disabled>Next</button>
     </div>
 
-    {{-- Reports Queue --}}
-    <h2 class="text-xl font-semibold mb-2">Reports Queue</h2>
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Reporter</th>
-                    <th>Target</th>
-                    <th>Status</th>
-                    <th>Handled By</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($reports as $r)
-                    <tr>
-                        <td>{{ $r->id }}</td>
-                        <td>{{ $r->reporter->name }}</td>
-                        <td>{{ $r->reportedUser->name }}</td>
-                        <td>{{ ucfirst($r->status) }}</td>
-                        <td>{{ optional($r->handledByAdmin)->name ?? '-' }}</td>
-                        <td><a href="{{ route('admin.reports.show', $r) }}" class="btn btn-view">View</a></td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    {{ $reports->links() }}
+
+
 @endsection
 
 @section('scripts')

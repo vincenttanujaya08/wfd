@@ -183,13 +183,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('admin.users.update');
 
 
-    // Reports
-    Route::get('/admin/reports', [AdminReportController::class, 'index'])
-        ->name('admin.reports.index');
-    Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])
-        ->name('admin.reports.show');
-    Route::put('/admin/reports/{report}', [AdminReportController::class, 'update'])
-        ->name('admin.reports.update');
+// Reports listing
+Route::get('/admin/reports', [AdminReportController::class, 'index'])
+     ->name('admin.reports.index');
+
+// Report detail & actions
+Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])
+     ->name('admin.reports.show');
+Route::post('/admin/reports/{report}', [AdminReportController::class, 'handle'])
+     ->name('admin.reports.handle');
+
 
     // Bans
     Route::get('/admin/bans', [BanController::class, 'index'])
