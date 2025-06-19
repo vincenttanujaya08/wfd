@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Carbon\Carbon;
+use App\Models\Ban;
 
 class User extends Authenticatable
 {
@@ -16,8 +18,7 @@ class User extends Authenticatable
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
-     */
-    protected $fillable = [
+     */ protected $fillable = [
         'name',
         'email',
         'password',
@@ -115,5 +116,34 @@ class User extends Authenticatable
     public function appeals()
     {
         return $this->hasMany(Appeal::class, 'user_id');
+    }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+    public function isAdmin(): bool
+    {
+        return $this->role_id === 1;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role_id === 2;
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->bans()
+            ->where('is_active', 1)
+            ->whereDate('banned_until', '>=', Carbon::now())
+            ->exists();
+    }
+
+    public function currentBan()
+    {
+        return $this->bans()
+            ->where('is_active', 1)
+            ->whereDate('banned_until', '>=', Carbon::now())
+            ->first();
     }
 }

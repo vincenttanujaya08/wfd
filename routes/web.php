@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\admin\BanController;
+use App\Http\Controllers\admin\AppealController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +37,7 @@ Route::get('/', function () {
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('explore'); // atau 'load'
+        return redirect()->route('explore');
     }
     return view('home');
 });
@@ -42,7 +46,7 @@ Route::view('/home', 'home')->middleware('guest');
 Route::view('/load', 'load')->name('load');
 
 // Authenticated Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:user'])->group(function () {
     // Explore
     Route::view('/explore', 'explore')->name('explore');
 
@@ -89,10 +93,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/posts/{id}/hidden-comments', [PostController::class, 'getHiddenComments'])->name('posts.hidden-comments');
     Route::patch('/comments/{id}/unhide', [PostController::class, 'unhideComment'])->name('comments.unhide');
 
+
+
     //Report
-    Route::get('/report', [ReportController::class, 'show'])->name('report.show');
-    Route::get('/report/search-users', [ReportController::class, 'searchUsers']);
-    Route::post('/report/send', [ReportController::class, 'sendReport']);
+    //Report (front-end user reporting)
+    Route::middleware('auth')->group(function () {
+        // Tampilkan halaman report + search form
+        Route::get('/report', [ReportController::class, 'show'])
+            ->name('report.show');
+
+        // AJAX live-search users (paginate 5)
+        Route::get('/report/search-users', [ReportController::class, 'searchUsers'])
+            ->name('report.searchUsers');
+
+        // AJAX kirim report
+        Route::post('/report/send', [ReportController::class, 'sendReport'])
+            ->name('report.sendReport');
+    });
 });
 
 // Guest (not logged in) routes for Login & Signup
@@ -148,7 +165,48 @@ Route::get('/db-test', function () {
 });
 
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    // Tambahkan route admin lainnya di sini jika perlu
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
+
+    // AdminUserController.php (User Management)
+    // AJAX search endpoint (5 per page)
+    Route::get('/admin/dashboard/search-users', [AdminController::class, 'searchUsers'])
+        ->name('admin.dashboard.searchUsers');
+
+
+    Route::get('/admin/users/create', [AdminUserController::class, 'create'])
+        ->name('admin.users.create');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])
+        ->name('admin.users.store');
+    Route::get('/admin/users/{user}/edit', [AdminUserController::class, 'edit'])
+        ->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])
+        ->name('admin.users.update');
+
+
+    // Reports listing
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])
+        ->name('admin.reports.index');
+
+    // Report detail & actions
+    Route::get('/admin/reports/{report}', [AdminReportController::class, 'show'])
+        ->name('admin.reports.show');
+    Route::post('/admin/reports/{report}', [AdminReportController::class, 'handle'])
+        ->name('admin.reports.handle');
+
+
+    // Bans
+    Route::get('/admin/bans', [BanController::class, 'index'])
+        ->name('admin.bans.index');
+    Route::post('/admin/bans', [BanController::class, 'store'])
+        ->name('admin.bans.store');
+    Route::put('/admin/bans/{ban}', [BanController::class, 'update'])
+        ->name('admin.bans.update');
+
+    // Appeals
+    Route::get('/admin/appeals', [AppealController::class, 'index'])
+        ->name('admin.appeals.index');
+    Route::put('/admin/appeals/{appeal}', [AppealController::class, 'update'])
+        ->name('admin.appeals.update');
 });

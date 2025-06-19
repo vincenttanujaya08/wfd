@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Ban extends Model
 {
     protected $fillable = ['user_id', 'admin_id', 'banned_at', 'banned_until', 'reason', 'report_id', 'is_active'];
+    protected $casts = [
+        'banned_at'    => 'datetime',
+        'banned_until' => 'datetime',
+    ];
 
     public function user()
     {
