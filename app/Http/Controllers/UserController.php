@@ -8,50 +8,51 @@ use App\Models\User;
 class UserController extends Controller
 {
     /**
-     * Mengembalikan semua user (tanpa acak).
-     * Cocok bila ingin diacak di front-end.
+     * Mengembalikan semua user (kecuali admin & banned) – urut asli.
      */
     public function indexAll()
     {
-        // Get all users with id, name, and profile_image
-        $users = User::get(['id', 'name', 'profile_image']);
+        $users = User::whereHas('role', fn($q) =>
+                    $q->whereNotIn('name',['admin','banned'])
+                )
+                ->get(['id','name','profile_image','role_id','description']);
 
-        return response()->json($users, 200);
+        return response()->json($users,200);
     }
 
-
     /**
-     * Mengembalikan semua user dalam urutan acak.
-     * Cocok bila Anda mau data sudah di-shuffle di server.
+     * Mengembalikan semua user (kecuali admin & banned) – di‐shuffle.
      */
     public function indexAllShuffled()
     {
-        // Get id, name, and profile_image, then shuffle the results
-        $users = User::get(['id', 'name', 'profile_image'])->toArray();
-        shuffle($users);
+        $users = User::whereHas('role', fn($q) =>
+                    $q->whereNotIn('name',['admin','banned'])
+                )
+                ->get(['id','name','profile_image','role_id','description'])
+                ->toArray();
 
-        return response()->json($users, 200);
+        shuffle($users);
+        return response()->json($users,200);
     }
 
-
-
     /**
-     * Mencari user berdasarkan query string.
-     * Misal: GET /users/search?query=john
+     * Cari user (kecuali admin & banned) dengan LIKE.
+     * GET /users/search?query=john
      */
     public function search(Request $request)
     {
-        $query = $request->input('query');
-
-        if (!$query) {
-            return response()->json([], 200);
+        $term = trim($request->input('query',''));
+        if ($term === '') {
+            return response()->json([],200);
         }
 
-        // Search users with name matching the query
-        $users = User::where('name', 'LIKE', '%' . $query . '%')
-            ->limit(10)
-            ->get(['id', 'name', 'profile_image']);
+        $users = User::whereHas('role', fn($q) =>
+                        $q->whereNotIn('name',['admin','banned'])
+                    )
+                    ->where('name','like',"%{$term}%")
+                    ->limit(10)
+                    ->get(['id','name','profile_image','role_id','description']);
 
-        return response()->json($users, 200);
+        return response()->json($users,200);
     }
 }

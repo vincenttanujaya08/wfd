@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',       // ⬅️ tambahkan ini
         'profile_image',
         'description',
     ];

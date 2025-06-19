@@ -34,7 +34,7 @@ use App\Models\User;
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
-        if ($user->role === 'admin') {
+        if ($user->role === '1') {
             return redirect()->route('admin.dashboard');
         }
         return redirect()->route('explore');
@@ -146,9 +146,9 @@ Route::get('/user-details/{id}', function ($id) {
     $user = User::find($id);
     if ($user) {
         return response()->json([
-            'name'          => $user->name,
+            'name' => $user->name,
             'profile_image' => $user->profile_image,
-            'description'   => $user->description,
+            'description' => $user->description,
         ]);
     }
     return response()->json(['error' => 'User not found'], 404);
@@ -209,4 +209,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.appeals.index');
     Route::put('/admin/appeals/{appeal}', [AppealController::class, 'update'])
         ->name('admin.appeals.update');
+
+
+
+
+    // … routes auth, public, dll …
+
 });

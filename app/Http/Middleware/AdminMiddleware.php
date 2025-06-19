@@ -13,6 +13,6 @@ class AdminMiddleware
             return $next($request);
         }
         // Pastikan redirect ke route yang jelas untuk user biasa
-        return redirect()->route('load'); // atau ke 'explore', bukan ke '/'
+        abort(403, 'Unauthorized.');  // atau ke 'explore', bukan ke '/'
     }
 }
