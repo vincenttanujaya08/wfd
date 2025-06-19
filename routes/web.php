@@ -1,8 +1,8 @@
 <?php
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminReportController;
-use App\Http\Controllers\BanController;
-use App\Http\Controllers\AppealController;
+use App\Http\Controllers\admin\BanController;
+use App\Http\Controllers\admin\AppealController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -215,4 +215,4 @@ Route::post('/admin/reports/{report}', [AdminReportController::class, 'handle'])
 
 });
 
-;
+

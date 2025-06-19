@@ -276,9 +276,9 @@
       <span class="nav-text">Reports</span>
     </a>
 
-    <a href="{{ route('admin.appeals.index') }}" class="nav-item {{ Request::routeIs('admin.appeals.*') ? 'active' : '' }}" aria-label="Appeals">
+    <a href="{{ route('admin.bans.index') }}" class="nav-item {{ Request::routeIs('admin.bans.*') ? 'active' : '' }}" aria-label="bans">
       <i class="lni lni-ban-2"></i>
-      <span class="nav-text">Appeals</span>
+      <span class="nav-text">bans</span>
     </a>
   </nav>
 

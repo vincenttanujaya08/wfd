@@ -55,7 +55,7 @@ class AdminReportController extends Controller
                     'status' => 'handled',
                     'handled_by_admin_id' => Auth::id(),
                     'handled_at' => now(),
-                ]);
+                ]); 
 
 
                 $user = $report->reportedUser;

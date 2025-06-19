@@ -59,12 +59,14 @@
                         <td>{{ $r->reporter->name }}</td>
                         <td>{{ $r->reportedUser->name }}</td>
                         <td>
-                            @if ($r->handledByAdmin)
-                              Handle by  {{ $r->handledByAdmin->name }}
+                            @if ($r->status === 'handled' && $r->handledByAdmin)
+                                Handled by {{ $r->handledByAdmin->name }}
                             @else
                                 {{ ucfirst($r->status) }}
                             @endif
                         </td>
+
+
 
 
                         <td>
