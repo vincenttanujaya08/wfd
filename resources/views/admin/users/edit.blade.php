@@ -47,12 +47,71 @@
         .form-container button:hover {
             background-color: #17a556;
         }
+
+        .alert-error {
+            position: fixed;
+            top: 1rem;
+            left: 52%;
+            transform: translateX(-50%);
+            max-width: 320px;
+            width: 100%;
+            background: #dc2626;
+            /* red-600 */
+            color: white;
+            border-radius: .5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            gap: .75rem;
+            z-index: 10000;
+        }
+
+        .alert-error i {
+            font-size: 1.75rem;
+            line-height: 1;
+        }
+
+        .alert-error .message {
+            flex: 1;
+        }
+
+        .alert-error .message .title {
+            font-weight: bold;
+            margin-bottom: .25rem;
+        }
+
+        .alert-error .message .text {
+            font-size: .9rem;
+        }
+
+        .alert-error button.close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            line-height: 1;
+            cursor: pointer;
+        }
     </style>
 @endsection
 
 @section('content')
+
+    @if ($errors->any())
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="alert-error">
+            <i class="lni lni-cross-circle"></i>
+            <div class="message">
+                <div class="title">Error!</div>
+                <div class="text">{{ $errors->first() }}</div>
+            </div>
+            <button class="close" @click="show = false">&times;</button>
+        </div>
+    @endif
     <div class="form-container">
         <h1>Edit User</h1>
+
+
         <form action="{{ route('admin.users.update', $user) }}" method="POST" class="form-container">
             @csrf @method('PUT')
             <label>Name</label>

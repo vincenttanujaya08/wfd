@@ -36,6 +36,7 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.dashboard')
                          ->with('success', 'User/Admin berhasil ditambahkan');
+                         
     }
 
     /**

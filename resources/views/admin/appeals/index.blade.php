@@ -1,5 +1,5 @@
 @extends('admin.layouts.template')
-@section('title','Appeals')
+@section('title','')
 
 @section('head')
 <style>
