@@ -212,7 +212,7 @@
             <p>{{ $activeReports }}</p>
         </div>
         <div class="card">
-            <h4>Pending Suspensions</h4>
+            <h4>Total Banned</h4>
             <p>{{ $pendingSuspensions }}</p>
         </div>
     </div>
