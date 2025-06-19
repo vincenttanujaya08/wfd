@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
 use App\Models\User;
 
 class LoginController extends Controller
@@ -33,10 +34,25 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'), $request->remember)) {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
+            // 1. Ambil warning terbaru yang belum dibaca
+            $warning = $user->warnings()
+                ->where('seen', 0)
+                ->latest('created_at')
+                ->first();
+
+            if ($warning) {
+                // 2. Flash ke session agar bisa ditampilkan di blade
+                Session::flash('warning_message', $warning->message);
+
+                // 3. Tandai warning ini sudah seen
+                $warning->update(['seen' => 1]);
+            }
+
+            // 4. Redirect berdasarkan role
             if ($user->role_id === 1) {
-                // Redirect ke route admin.dashboard (URL berubah ke /admin/dashboard)
                 return redirect()->route('admin.dashboard');
             }
 

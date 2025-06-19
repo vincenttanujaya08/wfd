@@ -8,7 +8,7 @@ use App\Models\Appeal;
 use App\Models\Ban;
 use Illuminate\Support\Carbon;
 
-class AppealController extends Controller
+class UserAppealController extends Controller
 {
     public function create()
     {

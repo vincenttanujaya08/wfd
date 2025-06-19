@@ -21,7 +21,8 @@ use App\Http\Controllers\{
     ProfileController,
     UserController,
     AdminController,
-    ReportController
+    ReportController,
+    UserAppealController
 };
 use App\Models\User;
 
@@ -45,8 +46,15 @@ Route::get('/', function () {
 Route::view('/home', 'home')->middleware('guest');
 Route::view('/load', 'load')->name('load');
 
+// Khusus user diblokir
+Route::middleware(['auth', 'banned'])->group(function () {
+    Route::get('appeal', [UserAppealController::class, 'create'])->name('appeal.create');
+    Route::post('appeal', [UserAppealController::class, 'store'])->name('appeal.store');
+});
+
+
 // Authenticated Routes
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'role:user', 'not.banned'])->group(function () {
     // Explore
     Route::view('/explore', 'explore')->name('explore');
 
@@ -165,7 +173,7 @@ Route::get('/db-test', function () {
 });
 
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin', 'not.banned'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
         ->name('admin.dashboard');
 

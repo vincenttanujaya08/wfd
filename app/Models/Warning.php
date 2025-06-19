@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Warning extends Model
 {
-    protected $fillable = ['user_id', 'admin_id', 'message', 'report_id'];
+    protected $fillable = ['user_id', 'admin_id', 'message', 'report_id', 'seen'];
 
     public function user()
     {

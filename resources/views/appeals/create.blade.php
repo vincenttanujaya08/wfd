@@ -13,7 +13,6 @@
     {{-- Navbar sederhana --}}
     <nav class="bg-white shadow p-4 mb-8">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="{{ route('home') }}" class="font-bold text-xl">MyApp</a>
             <div>
                 @auth
                 <span class="mr-4">Halo, {{ auth()->user()->name }}</span>

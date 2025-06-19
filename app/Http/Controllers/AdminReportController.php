@@ -46,7 +46,7 @@ class AdminReportController extends Controller
                 // attach a warning record...
                 $report->reportedUser->warnings()->create([
                     'admin_id' => Auth::id(),
-                    'message' => $req->input('message', ''),
+                    'message' => $req->input('message', 'This is an official warning: your recent activity violates our Community Guidelines. Please review the rules and adjust your behavior to avoid further action.'),
                     'report_id' => $report->id,
                 ]);
                 break;
@@ -55,7 +55,7 @@ class AdminReportController extends Controller
                     'status' => 'handled',
                     'handled_by_admin_id' => Auth::id(),
                     'handled_at' => now(),
-                ]); 
+                ]);
 
 
                 $user = $report->reportedUser;
