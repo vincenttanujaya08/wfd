@@ -786,11 +786,7 @@
 
 
         const currentUser = {
-            id: {
-                {
-                    auth() - > user() - > id
-                }
-            },
+            id: "{{ auth()->user()->id }}",
             name: "{{ auth()->user()->name }}"
         };
 
