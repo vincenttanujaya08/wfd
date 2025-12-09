@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             UserSeeder::class,
             PostSeeder::class,
+            ReportSeeder::class,
+            AppealSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }
